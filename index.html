@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>法文字母表 · 點擊聽發音</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#fff; --ink:#1f2433; --muted:#6b7280; --line:#e6e0d4;
+    --blue:#1d3a8a; --red:#c8312b; --accent:#1d3a8a; --accent-soft:#e8edfb;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#14171f; --card:#1d212c; --ink:#eef0f5; --muted:#9aa3b5; --line:#2c3243; --accent:#8fa8ff; --accent-soft:#252c47; --red:#ff7a72;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",sans-serif;line-height:1.5}
+  .wrap{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+  header h1{margin:0 0 4px;font-size:26px}
+  header p{margin:0;color:var(--muted);font-size:14px}
+  .flag{display:inline-block;width:28px;height:18px;border-radius:3px;vertical-align:-2px;margin-right:8px;
+    background:linear-gradient(90deg,#1d3a8a 33.3%,#fff 33.3% 66.6%,#c8312b 66.6%);border:1px solid var(--line)}
+  .bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+  .bar label{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  select,input[type=range]{font:inherit}
+  select{padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);max-width:260px}
+  button{font:inherit;cursor:pointer}
+  .btn{padding:7px 14px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:#fff}
+  .btn.ghost{background:transparent;color:var(--accent)}
+  #status{font-size:13px;color:var(--muted);width:100%}
+  #status.warn{color:var(--red)}
+  h2{font-size:18px;margin:28px 0 10px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;transition:box-shadow .15s,border-color .15s}
+  .card.playing{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .top{display:flex;align-items:center;gap:12px}
+  .letter{font-size:40px;font-weight:700;line-height:1;min-width:64px;color:var(--accent);font-family:Georgia,"Times New Roman",serif}
+  .letter small{font-size:24px;font-weight:400;color:var(--muted)}
+  .meta{flex:1;min-width:0}
+  .name{font-weight:600}
+  .ipa{color:var(--muted);font-size:14px;font-family:"Noto Sans","Segoe UI",sans-serif}
+  .play{width:44px;height:44px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:16px;flex:none;display:grid;place-items:center}
+  .play:hover{filter:brightness(1.1)}
+  .play:focus-visible,.ex:focus-visible,.btn:focus-visible{outline:3px solid var(--accent-soft);outline-offset:2px}
+  .ex{display:flex;align-items:center;gap:8px;border:0;background:var(--accent-soft);color:var(--ink);border-radius:8px;padding:6px 10px;text-align:left;width:100%}
+  .ex .fr{font-weight:600}
+  .ex .zh{color:var(--muted);font-size:13px;margin-left:auto}
+  .tip{font-size:13px;color:var(--muted);margin-top:24px}
+
+  /* quiz */
+  .quiz{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:8px 0 8px}
+  .qhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .qhead h2{margin:0 auto 0 0}
+  .qprog{font-size:13px;color:var(--muted);margin:14px 0 4px}
+  .qbig{font-family:Georgia,"Times New Roman",serif;font-size:56px;font-weight:700;color:var(--accent);line-height:1.1}
+  .qask{font-size:14px;color:var(--muted)}
+  .qctl{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;align-items:center}
+  .btn.rec{background:var(--red);border-color:var(--red)}
+  .btn[disabled]{opacity:.5;cursor:not-allowed}
+  .qheard{margin-top:12px;min-height:24px;font-size:16px}
+  .qheard b{color:var(--accent)}
+  .qres{margin-top:10px;padding:12px 14px;border-radius:10px;background:var(--accent-soft)}
+  .qres .score{font-size:32px;font-weight:700}
+  .qres.ok .score{color:#16a34a}
+  .qres.bad .score{color:var(--red)}
+  .qtype{padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;min-width:220px}
+  .qsum table{border-collapse:collapse;width:100%;margin-top:8px;font-size:14px}
+  .qsum td,.qsum th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="flag"></span>法文字母表 L'alphabet français</h1>
+    <p>點 ▶ 聽字母名稱發音；點下方單字聽整個單字的發音。</p>
+  </header>
+
+  <div class="bar">
+    <label>聲音
+      <select id="voiceSel" aria-label="選擇法語聲音"></select>
+    </label>
+    <label>語速
+      <input id="rate" type="range" min="0.5" max="1.1" step="0.05" value="0.8">
+      <span id="rateVal">0.80×</span>
+    </label>
+    <button class="btn ghost" id="seqBtn">▶ 依序朗讀 A–Z</button>
+    <div id="status">載入語音中…</div>
+    <div id="nowUsing" style="font-size:12px;color:var(--muted);width:100%"></div>
+  </div>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead">
+      <h2>🎤 隨機測驗</h2>
+      <select id="qMode" aria-label="測驗內容">
+        <option value="letter">字母名稱</option>
+        <option value="word">範例單字</option>
+        <option value="mix" selected>混合</option>
+      </select>
+      <select id="qCount" aria-label="題數">
+        <option value="5">5 題</option>
+        <option value="10" selected>10 題</option>
+        <option value="20">20 題</option>
+      </select>
+      <button class="btn" id="qStart">開始測驗</button>
+    </div>
+    <div id="qBody" hidden>
+      <div class="qprog" id="qProg"></div>
+      <div class="qask" id="qAsk"></div>
+      <div class="qbig" id="qBig"></div>
+      <div class="ipa" id="qHint"></div>
+      <div class="qctl">
+        <button class="btn ghost" id="qHear">🔊 聽示範</button>
+        <button class="btn" id="qMic">🎤 按下開始說</button>
+        <button class="btn ghost" id="qSkip">略過</button>
+      </div>
+      <div class="qctl" id="qTypeRow" hidden>
+        <input class="qtype" id="qType" placeholder="麥克風不能用時，輸入你唸的內容" aria-label="手動輸入">
+        <button class="btn ghost" id="qTypeGo">評分</button>
+      </div>
+      <div class="qheard" id="qHeard" aria-live="polite"></div>
+      <div id="qResult" aria-live="polite"></div>
+      <div class="qctl"><button class="btn" id="qNext" hidden>下一題 →</button></div>
+    </div>
+    <div class="qsum" id="qSummary"></div>
+    <div class="tip" id="qNote">評分方式：頁面把你的聲音轉成文字，再和標準答案比對相似度（不是分析音色或腔調的細節）。請在安靜的地方，用法語唸。</div>
+  </section>
+
+  <h2>26 個字母</h2>
+  <div class="grid" id="alpha"></div>
+
+  <h2>帶重音符號的字母與特殊字母 <small style="font-weight:400;color:var(--muted);font-size:13px">▶ 聽發音　🗣 聽符號名稱</small></h2>
+  <div class="grid" id="accents"></div>
+
+  <p class="tip">發音來自你的裝置／瀏覽器內建的法語（fr-FR 或 fr-CA、fr-BE）語音引擎，以法語母語者錄製建模的聲音朗讀。聲音品質與可選項目依裝置而異：iPhone/Mac 可選 Thomas、Amélie、Audrey；Windows 的 Edge 有 Denise、Henri 等自然語音；Android/Chrome 有 Google français。</p>
+</div>
+
+<script>
+const LETTERS = [
+  ["A","a","/a/","a","avion","飛機"],
+  ["B","bé","/be/","bé","bébé","嬰兒"],
+  ["C","cé","/se/","cé","chat","貓"],
+  ["D","dé","/de/","dé","dîner","晚餐"],
+  ["E","eu","/ə/","euh","école","學校"],
+  ["F","effe","/ɛf/","effe","fleur","花"],
+  ["G","gé","/ʒe/","gé","gâteau","蛋糕"],
+  ["H","hache","/aʃ/","hache","hôtel","旅館"],
+  ["I","i","/i/","i","île","島"],
+  ["J","ji","/ʒi/","ji","jardin","花園"],
+  ["K","ka","/ka/","ka","kilo","公斤"],
+  ["L","elle","/ɛl/","elle","livre","書"],
+  ["M","emme","/ɛm/","emme","maison","房子"],
+  ["N","enne","/ɛn/","enne","nuit","夜晚"],
+  ["O","o","/o/","o","orange","柳橙"],
+  ["P","pé","/pe/","pé","pain","麵包"],
+  ["Q","ku","/ky/","kü","question","問題"],
+  ["R","erre","/ɛʁ/","erre","rouge","紅色"],
+  ["S","esse","/ɛs/","esse","soleil","太陽"],
+  ["T","té","/te/","té","table","桌子"],
+  ["U","u","/y/","u","une","一（陰性）"],
+  ["V","vé","/ve/","vé","voiture","汽車"],
+  ["W","double vé","/dubləve/","double vé","wagon","車廂"],
+  ["X","iks","/iks/","ixe","xylophone","木琴"],
+  ["Y","i grec","/igʁɛk/","i grec","yeux","眼睛"],
+  ["Z","zède","/zɛd/","zède","zéro","零"]
+];
+const ACCENTS = [
+  ["é","accent aigu","/e/","e accent aigu","été","夏天"],
+  ["è","accent grave","/ɛ/","e accent grave","père","父親"],
+  ["ê","accent circonflexe","/ɛ/","e accent circonflexe","forêt","森林"],
+  ["ë","tréma","/ɛ/","e tréma","Noël","聖誕節"],
+  ["à","accent grave","/a/","a accent grave","là","那裡"],
+  ["â","accent circonflexe","/ɑ/","a accent circonflexe","âge","年齡"],
+  ["î","accent circonflexe","/i/","i accent circonflexe","île","島"],
+  ["ï","tréma","/i/","i tréma","maïs","玉米"],
+  ["ô","accent circonflexe","/o/","o accent circonflexe","hôtel","旅館"],
+  ["û","accent circonflexe","/y/","u accent circonflexe","sûr","確定"],
+  ["ù","accent grave","/y/","u accent grave","où","哪裡"],
+  ["ü","tréma","/y/","u tréma","Saül","（人名）"],
+  ["ç","c cédille","/s/","c cédille","français","法語"],
+  ["œ","e dans l'o","/œ/","e dans l'o","sœur","姊妹"],
+  ["æ","e dans l'a","/e/","e dans l'a","curriculum vitæ","履歷"]
+];
+
+// Words whose special characters some voices mispronounce: speak a plain spelling instead
+const SPOKEN = {"sœur":"soeur","curriculum vitæ":"curriculum vitae"};
+// Lone accented characters are read by NAME by many engines ("e accent aigu"), so feed real short French words that sound exactly like the letter: et=/e/, ait=/ɛ/, a=/a/, eu=/y/, eau=/o/
+const ACCENT_SOUND = {"é":"et","è":"ait","ê":"ait","ë":"ait","à":"a","â":"âme","î":"i","ï":"i","ô":"eau","û":"eu","ù":"eu","ü":"eu","ç":"ça","œ":"heure","æ":"et"};
+const synth = window.speechSynthesis;
+let voices = [], current = null, seqRunning = false;
+const statusEl = document.getElementById('status');
+const sel = document.getElementById('voiceSel');
+const rate = document.getElementById('rate');
+const rateVal = document.getElementById('rateVal');
+
+// Prefer high-quality native French voices
+const PREF = [/online.*natural|natural/i, /google.*fran/i, /thomas|amélie|amelie|audrey|aurélie|aurelie|marie|henri|denise|eloise|vivienne|remy|rémi/i];
+function score(v){
+  let s = 0;
+  const lang = v.lang.replace('_','-').toLowerCase();
+  if (lang === 'fr-fr') s += 30; else if (lang.startsWith('fr')) s += 15; else return -1;
+  PREF.forEach((re,i)=>{ if(re.test(v.name)) s += 20 - i*5; });
+  if (/enhanced|premium/i.test(v.name)) s += 8;
+  if (v.localService === false) s += 2;
+  return s;
+}
+function loadVoices(){
+  const all = synth ? synth.getVoices() : [];
+  voices = all.filter(v=>score(v)>=0).sort((a,b)=>score(b)-score(a));
+  sel.innerHTML = '';
+  if(!voices.length){
+    statusEl.textContent = '⚠ 這個裝置/瀏覽器沒有找到法語語音。請改用 Chrome、Edge 或 Safari，或在系統設定中下載法語語音。';
+    statusEl.className = 'warn';
+    return;
+  }
+  voices.forEach((v,i)=>{
+    const o = document.createElement('option');
+    o.value = i; o.textContent = `${v.name} (${v.lang})`;
+    sel.appendChild(o);
+  });
+  try{ const saved = localStorage.getItem('frVoice'); const idx = voices.findIndex(v=>v.name===saved); if(idx>=0) sel.value = idx; }catch(e){}
+  statusEl.textContent = `已找到 ${voices.length} 個法語聲音，預設使用最佳選擇。`;
+  statusEl.className = '';
+}
+if(!synth){ statusEl.textContent='⚠ 此瀏覽器不支援語音合成。'; statusEl.className='warn'; }
+else{ loadVoices(); synth.onvoiceschanged = loadVoices; setTimeout(()=>{ if(!voices.length) loadVoices(); }, 600); }
+
+sel.addEventListener('change',()=>{ try{ localStorage.setItem('frVoice', voices[sel.value].name);}catch(e){} speakText('Bonjour', null); });
+rate.addEventListener('input',()=>{ rateVal.textContent = (+rate.value).toFixed(2)+'×'; });
+
+function speakText(text, el, onend){
+  if(!synth){ return; }
+  if(synth.speaking || synth.pending) synth.cancel();
+  document.querySelectorAll('.playing').forEach(n=>n.classList.remove('playing'));
+  const u = new SpeechSynthesisUtterance(text);
+  const v = voices[+sel.value] || voices[0];
+  if(v){ u.voice = v; u.lang = (v.lang || 'fr-FR').replace('_','-'); } else { u.lang = 'fr-FR'; }
+  u.rate = +rate.value; u.pitch = 1;
+  const used = document.getElementById('nowUsing');
+  if(used) used.textContent = '正在使用：' + (v ? v.name + ' (' + v.lang + ')' : '（無法語聲音，使用 fr-FR 預設）') + ' ／ 朗讀內容：' + text;
+  if(el){ el.classList.add('playing'); }
+  const done = ()=>{ if(el) el.classList.remove('playing'); if(onend) onend(); };
+  u.onend = done; u.onerror = done;
+  synth.speak(u);
+}
+
+function makeCard(item, container){
+  const [ch, name, ipa, say, word, zh] = item;
+  const isAlpha = container.id === 'alpha';
+  const card = document.createElement('div'); card.className='card';
+  const label = isAlpha ? `${ch}<small>${ch.toLowerCase()}</small>` : ch;
+  card.innerHTML = `
+    <div class="top">
+      <div class="letter">${label}</div>
+      <div class="meta">${isAlpha ? `<div class="name">${name}</div><div class="ipa">${ipa}</div>` : `<div class="name">發音 ${ipa}</div><div class="ipa">符號名稱在下方按鈕</div>`}</div>
+      <button class="play" aria-label="播放 ${ch} 的發音">▶</button>
+    </div>
+    <button class="ex" aria-label="播放單字 ${word}"><span>🔊</span><span class="fr">${word}</span><span class="zh">${zh}</span></button>`;
+  card.querySelector('.play').addEventListener('click',()=>{ seqRunning=false; speakText(isAlpha ? say : (ACCENT_SOUND[ch]||say), card); });
+  if(!isAlpha){
+    const nb=document.createElement('button'); nb.className='ex'; nb.setAttribute('aria-label','唸名稱 '+name);
+    nb.innerHTML='<span>🗣</span><span class="fr">唸名稱</span><span class="zh">'+name+'</span>';
+    nb.addEventListener('click',()=>{ seqRunning=false; speakText(say, card); });
+    card.appendChild(nb);
+  }
+  card.querySelector('.ex').addEventListener('click',()=>{ seqRunning=false; speakText(SPOKEN[word] || word, card); });
+  card._say = say;
+  container.appendChild(card);
+  return card;
+}
+const alphaCards = LETTERS.map(l=>makeCard(l, document.getElementById('alpha')));
+ACCENTS.forEach(l=>makeCard(l, document.getElementById('accents')));
+
+const seqBtn = document.getElementById('seqBtn');
+seqBtn.addEventListener('click',()=>{
+  if(seqRunning){ seqRunning=false; synth.cancel(); seqBtn.textContent='▶ 依序朗讀 A–Z'; return; }
+  seqRunning = true; seqBtn.textContent='■ 停止';
+  let i = 0;
+  const next = ()=>{
+    if(!seqRunning || i>=alphaCards.length){ seqRunning=false; seqBtn.textContent='▶ 依序朗讀 A–Z'; return; }
+    const c = alphaCards[i++];
+    c.scrollIntoView({block:'nearest',behavior:'smooth'});
+    speakText(c._say, c, ()=>setTimeout(next, 350));
+  };
+  next();
+});
+
+/* ================= Random quiz with microphone ================= */
+(function(){
+  const $ = id => document.getElementById(id);
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  // What a speech recognizer might return for each letter name (besides the name itself)
+  const ACCEPT = {
+    A:["a","ah","ha"], B:["b","bee","be","bey","beh","bai"], C:["c","se","sea","ce","ses"],
+    D:["d","de","day","dey","des"], E:["e","euh","eu","heu","eux","oe"], F:["f","ef","eff","aff","effe"],
+    G:["g","je","jet","gee"], H:["h","ache","ash","hash","ach","hache"], I:["i","hi","y","ie"],
+    J:["j","gi","gie","jie","ji"], K:["k","ca","kah","ka"], L:["l","el","aile","ail","elle"],
+    M:["m","em","aime","emme"], N:["n","en","aine","haine","enne"], O:["o","oh","eau","au","haut"],
+    P:["p","pe","pay","peu","pet"], Q:["q","ku","cu","qu","queue","ky","ki","cul"],
+    R:["r","er","air","aire","erre","ere"], S:["s","es","ess","esse"], T:["t","te","the","tea","tay"],
+    U:["u","you","hu","ue"], V:["v","ve","vey","vay","vais"],
+    W:["w","double ve","double v","doubleve","double vee","doublevé"],
+    X:["x","iks","ixe","ics","ix","hicks"], Y:["y","i grec","igrec","y grec","i grecque","grec"],
+    Z:["z","zed","zede","zet","zèd"]
+  };
+  const norm = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/œ/g,'oe').replace(/æ/g,'ae').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
+  function lev(a,b){
+    const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+    let prev=Array.from({length:n+1},(_, j)=>j);
+    for(let i=1;i<=m;i++){
+      const cur=[i];
+      for(let j=1;j<=n;j++) cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+      prev=cur;
+    }
+    return prev[n];
+  }
+  const sim = (a,b) => (!a&&!b) ? 1 : 1 - lev(a,b)/Math.max(a.length,b.length);
+
+  const POOL = [];
+  LETTERS.forEach(([ch,name,ipa,say,word,zh])=>{
+    const cands = [...new Set([name,ch,say,...(ACCEPT[ch]||[])].map(norm))];
+    POOL.push({type:'letter', big: ch+' '+ch.toLowerCase(), ask:'請唸出這個字母的名稱', expected:name, ipa, cands, say, pass:70});
+    POOL.push({type:'word', big: word, ask:'請唸出這個單字', expected:word, ipa:zh, cands:[norm(word)], say:SPOKEN[word]||word, pass:75});
+  });
+
+  function scoreOf(q, heard){
+    const h = norm(heard); if(!h) return 0;
+    const tokens = h.split(' ');
+    let best = 0;
+    for(const c of q.cands){
+      if(h===c) return 100;
+      if(tokens.length<=3 && (' '+h+' ').includes(' '+c+' ')) best = Math.max(best,95);
+      best = Math.max(best, Math.round(sim(h,c)*100));
+    }
+    return best;
+  }
+
+  let questions=[], idx=0, results=[], judged=false, listening=false;
+  let finalText='', partialText='', dict=null, rec=null, autoStop=null, micReady=false, typeOnly=false;
+
+  const micBtn=$('qMic');
+  const note = t => { $('qNote').textContent = t; };
+  function showHeard(t){ const el=$('qHeard'); el.textContent=''; if(t){ el.append('聽到：'); const b=document.createElement('b'); b.textContent=t; el.append(b);} }
+  function setListening(on){
+    listening=on; micBtn.classList.toggle('rec',on);
+    micBtn.textContent = on ? '■ 說完了，按此停止' : '🎤 按下開始說';
+  }
+  function showType(reason){
+    typeOnly=true; $('qTypeRow').hidden=false;
+    if(reason) note(reason);
+  }
+
+  async function setupMic(){
+    try{ if(window.claude && window.claude.use) dict = await window.claude.use("dictation"); }catch(e){ dict=null; }
+    if(dict){
+      micReady=true;
+      dict.onPartial(({text})=>{ partialText=text; showHeard(text); });
+      dict.onFinal(({text})=>{
+        finalText=(finalText+' '+text).trim(); showHeard(finalText);
+        clearTimeout(autoStop); autoStop=setTimeout(()=>{ if(listening) stopMic(); }, 1500);
+      });
+      dict.onState(({state})=>{ setListening(state==='listening'); if(state==='idle') finishListening(); });
+      note('收音由頁面的語音輸入功能處理，第一次按下時瀏覽器會詢問麥克風權限。注意：語音輸入的辨識語言取決於你的瀏覽器／系統設定；若辨識成中文或英文，分數會偏低。評分是比對轉出的文字與標準答案的相似度，不是分析腔調細節。');
+    } else if(SR){
+      micReady=true;
+    } else {
+      showType('這個瀏覽器無法使用麥克風收音（建議用電腦版 Chrome 或 Edge）。你仍可手動輸入聽到／唸出的內容來練習評分。');
+    }
+  }
+
+  function startMic(){
+    if(!micReady){ showType(); return; }
+    if(synth) synth.cancel();
+    finalText=''; partialText=''; judged=false; showHeard('聆聽中…請開始說'); $('qResult').innerHTML='';
+    if(dict){
+      Promise.resolve(dict.start()).catch(err=>{
+        const code = (err && (err.code||err.message)) || '';
+        setListening(false);
+        if(String(code).includes('not_granted')) showType('麥克風權限被拒絕。你可以在瀏覽器網址列重新允許，或用手動輸入評分。');
+        else showHeard('無法開始收音，請再按一次。');
+      });
+    } else if(SR){
+      rec = new SR(); rec.lang='fr-FR'; rec.interimResults=true; rec.maxAlternatives=1;
+      rec.onresult = e => {
+        let f='',p='';
+        for(const r of e.results){ if(r.isFinal) f+=r[0].transcript+' '; else p+=r[0].transcript+' '; }
+        finalText=f.trim(); partialText=p.trim(); showHeard(finalText||partialText);
+      };
+      rec.onerror = e => {
+        if(e.error==='not-allowed'||e.error==='service-not-allowed') showType('這個頁面不能使用麥克風（權限被擋）。你可以手動輸入內容練習評分。');
+      };
+      rec.onend = () => { setListening(false); finishListening(); };
+      try{ rec.start(); setListening(true); }catch(e){ showType('無法開始收音。'); }
+    }
+  }
+  function stopMic(){
+    clearTimeout(autoStop);
+    if(dict){ Promise.resolve(dict.stop()).catch(()=>{}); }
+    else if(rec){ try{ rec.stop(); }catch(e){} }
+  }
+  function finishListening(){
+    if(judged) return;
+    const text=(finalText||partialText).trim();
+    if(!text){ if(!listening) showHeard('沒有聽到聲音，請再按一次麥克風。'); return; }
+    judged=true; evaluate(text);
+  }
+
+  function evaluate(text){
+    const q=questions[idx]; judged=true;
+    const score=scoreOf(q,text), ok=score>=q.pass;
+    results[idx]={q,heard:text,score,ok};
+    showHeard(text);
+    const label = score>=90 ? '很標準！' : ok ? '不錯，通過' : '再試一次';
+    $('qResult').innerHTML = `<div class="qres ${ok?'ok':'bad'}"><span class="score">${score}</span> 分　${ok?'✅':'❌'} ${label}<br><span class="ipa">標準答案：<b></b>　${q.type==='letter'?q.ipa:''}</span></div>`;
+    $('qResult').querySelector('b').textContent=q.expected;
+    $('qNext').hidden=false;
+    $('qNext').textContent = idx>=questions.length-1 ? '看總成績' : '下一題 →';
+  }
+
+  function showQuestion(){
+    const q=questions[idx]; judged=false; finalText=''; partialText='';
+    $('qProg').textContent=`第 ${idx+1} / ${questions.length} 題`;
+    $('qAsk').textContent=q.ask; $('qBig').textContent=q.big; $('qHint').textContent=q.type==='word'?q.ipa:'';
+    $('qHeard').textContent=''; $('qResult').innerHTML=''; $('qNext').hidden=true; $('qType').value='';
+    setListening(false);
+  }
+
+  function summary(){
+    $('qBody').hidden=true;
+    const total=results.length, avg=Math.round(results.reduce((s,r)=>s+r.score,0)/Math.max(1,total));
+    const passed=results.filter(r=>r.ok).length;
+    const rows=results.map((r,i)=>`<tr><td>${i+1}</td><td class="c"></td><td class="h"></td><td>${r.score}</td><td>${r.ok?'✅':'❌'}</td></tr>`).join('');
+    $('qSummary').innerHTML=`<h2>總成績：平均 ${avg} 分，通過 ${passed} / ${total} 題</h2>
+      <table><thead><tr><th>#</th><th>題目</th><th>你的發音（辨識結果）</th><th>分數</th><th></th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="qctl"><button class="btn" id="qAgain">再測一次</button></div>`;
+    const trs=$('qSummary').querySelectorAll('tbody tr');
+    results.forEach((r,i)=>{ trs[i].querySelector('.c').textContent=r.q.expected; trs[i].querySelector('.h').textContent=r.heard||'（略過）'; });
+    $('qAgain').addEventListener('click',startQuiz);
+  }
+
+  function startQuiz(){
+    const mode=$('qMode').value, n=+$('qCount').value;
+    let pool=POOL.filter(q=>mode==='mix'||q.type===mode);
+    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+    questions=pool.slice(0,Math.min(n,pool.length)); idx=0; results=[];
+    $('qSummary').innerHTML=''; $('qBody').hidden=false; seqRunning=false;
+    showQuestion();
+  }
+
+  $('qStart').addEventListener('click',startQuiz);
+  micBtn.addEventListener('click',()=>{ if(listening) stopMic(); else startMic(); });
+  $('qHear').addEventListener('click',()=>{ if(listening) stopMic(); speakText(questions[idx].say,null); });
+  $('qSkip').addEventListener('click',()=>{
+    if(listening) stopMic(); judged=true;
+    if(!results[idx]) results[idx]={q:questions[idx],heard:'',score:0,ok:false};
+    next();
+  });
+  $('qNext').addEventListener('click',next);
+  function next(){ if(idx>=questions.length-1) summary(); else { idx++; showQuestion(); } }
+  function typedGo(){ const v=$('qType').value.trim(); if(v){ if(listening) stopMic(); evaluate(v); } }
+  $('qTypeGo').addEventListener('click',typedGo);
+  $('qType').addEventListener('keydown',e=>{ if(e.key==='Enter') typedGo(); });
+
+  setupMic();
+})();
+</script>
+</body>
+</html>
