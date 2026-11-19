@@ -65,6 +65,10 @@ input[type=search]{font:inherit;padding:8px 14px;border-radius:12px;border:2px s
 /* vocab card */
 .wcard{display:flex;flex-direction:column;gap:6px}
 .wtop{display:flex;gap:12px;align-items:center}
+.pic{flex:0 0 56px;width:56px;height:56px;border-radius:16px;background:var(--inset);border:1.5px solid var(--line);display:grid;place-items:center;overflow:hidden}
+.pic .em{font-size:28px;line-height:1;text-align:center;letter-spacing:-2px;white-space:nowrap}
+.pic .pl{font-size:24px;font-weight:900;color:var(--muted)}
+.newlesson .pic{background:var(--surface)}
 .fr{font-size:24px;font-weight:900;line-height:1.2}
 .ipa{color:var(--muted);font-weight:700;font-size:15px}
 .badges{display:flex;flex-wrap:wrap;gap:6px}
@@ -238,6 +242,14 @@ details.task.isnew.finished{border-color:var(--ok)}
 .ritem .e{font-size:14px;color:var(--muted);font-weight:700}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 @media (max-width:520px){.two{grid-template-columns:1fr}h1{font-size:22px}.qprompt{font-size:21px}}
+#readbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:10px 14px;margin:14px 0 0}
+#readbar[hidden]{display:none}
+#readbar .rdinfo{font-size:13px;font-weight:800;color:var(--muted)}
+#readbar details{font-size:13px;font-weight:800;color:var(--muted)}
+#readbar summary{cursor:pointer;padding:4px 8px;border-radius:10px;border:2px solid var(--line)}
+#readbar .rdopts{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:8px}
+#readbar select{font:inherit;font-weight:800;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:3px 6px}
+.reading{outline:3px solid var(--brand);outline-offset:3px;border-radius:14px;background:var(--brand-soft)!important}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -260,6 +272,15 @@ details.task.isnew.finished{border-color:var(--ok)}
     <div class="note" id="voiceInfo" style="flex-basis:100%"></div>
   </header>
   <nav class="tabs" role="tablist" id="tabs"></nav>
+<div id="readbar" role="region" aria-label="整頁連續朗讀" hidden>
+  <button class="btn primary small" id="rdPlay">▶ 朗讀整頁</button>
+  <button class="btn ghost small" id="rdStop" hidden>■ 停止</button>
+  <span class="rdinfo" id="rdInfo" aria-live="polite"></span>
+  <details><summary>設定</summary><div class="rdopts">
+    <label>順序 <select id="rdOrder"><option value="fzfz">法 中 法 中（兩輪）</option><option value="ffzz">法 法 中 中</option></select></label>
+    <label>語速 <select id="rdRate"><option value="0.8">慢</option><option value="1">正常</option></select></label>
+    <label id="rdExL"><input type="checkbox" id="rdEx"> 含例句</label></div></details>
+</div>
   <section class="view" id="view"></section>
 </div>
 
@@ -278,7 +299,7 @@ details.task.isnew.finished{border-color:var(--ok)}
    每日資料：每天只要在 LESSONS 陣列後面新增一個物件即可
    ============================================================ */
 const POS = {poss:'所有格形容詞', art:'冠詞', n:'名詞', v:'動詞', adj:'形容詞', adv:'副詞', conj:'連接詞', pron:'代名詞', phrase:'片語／問候語'};
-const CATS = ['問候與禮貌','人物與稱呼','日常物品','動物與其他名詞','冠詞與小字詞','形容詞','所有格（我的／你的／他的）','縮寫與機構'];
+const CATS = ['問候與禮貌','人物與稱呼','日常物品','動物與其他名詞','冠詞與小字詞','形容詞','所有格（我的／你的／他的）','縮寫與機構','主詞代名詞','動詞 être（是）與肯定句','否定：ne … pas、oui／non','疑問句（am I / are you…）','否定疑問句'];
 
 const ALPHA = [['A','a','a'],['B','be','bé'],['C','se','cé'],['D','de','dé'],['E','ə','euh'],['F','ɛf','effe'],['G','ʒe','gé'],['H','aʃ','ache'],['I','i','i'],['J','ʒi','ji'],['K','ka','ka'],['L','ɛl','elle'],['M','ɛm','emme'],['N','ɛn','enne'],['O','o','o'],['P','pe','pé'],['Q','ky','cul'],['R','ɛ:r','erre'],['S','ɛs','esse'],['T','te','té'],['U','y','u'],['V','ve','vé'],['W','dublve','double vé'],['X','iks','ixe'],['Y','igrɛk','i grec'],['Z','zɛd','zède']];
 
@@ -389,7 +410,7 @@ const LESSONS = [L0, {
     {fr:'mais', ipa:'mɛ', zh:'但是', pos:'conj', cat:4, note:'ai 讀 [ɛ]（作業中的 maïs 玉米則讀 [mais]）'},
     {fr:'aussi', ipa:'osi', zh:'也', pos:'adv', cat:4, ex:['Moi aussi.','我也是。']},
     {fr:'moi', ipa:'mwa', zh:'我（強調）', pos:'pron', cat:4, ex:['Moi aussi.','我也是。']},
-    {fr:'vous', ipa:'vu', zh:'您／你們', pos:'pron', cat:4, ex:['Et vous ?','那您呢？']},
+    {fr:'vous', ipa:'vu', zh:'您／你們', pos:'pron', cat:8, ex:['Et vous ?','那您呢？']},
     {fr:'bien', ipa:'bjɛ̃', zh:'好', pos:'adv', cat:4, ex:['Je vais bien.','我很好。']},
     {fr:'pas', ipa:'pa', zh:'不（否定副詞）', pos:'adv', cat:4, ex:['Pas mal.','不錯（直譯：不壞）。']},
     // 補齊文法與作業中出現的字
@@ -398,12 +419,13 @@ const LESSONS = [L0, {
     {fr:'le', ipa:'lə', zh:'這個／那個（定冠詞，陽性）', pos:'art', g:'m', cat:4, ex:['C\'est le lycée.','這是那所高中。']},
     {fr:'la', ipa:'la', zh:'這個／那個（定冠詞，陰性）', pos:'art', g:'f', cat:4, note:'a 讀 [a]；母音開頭的名詞前會縮成 l\'', ex:['Le lit et la table.','床和桌子。']},
     {fr:'là', ipa:'la', zh:'那裡', pos:'adv', cat:4, note:'à 也讀 [a]，和 la 同音，靠重音符區分'},
-    {fr:'il', ipa:'il', zh:'他／它', pos:'pron', cat:4, note:'i 讀 [i]'},
-    {fr:'je', ipa:'ʒə', zh:'我（主詞）', pos:'pron', cat:4, ex:['Je vais bien.','我很好。']},
+    {fr:'il', ipa:'il', zh:'他／它', pos:'pron', cat:8, note:'i 讀 [i]'},
+    {fr:'je', ipa:'ʒə', zh:'我（主詞）', pos:'pron', cat:8, ex:['Je vais bien.','我很好。']},
     {fr:'vais', ipa:'vɛ', zh:'去／（身體狀況）如何：aller 的 je 變位', pos:'v', cat:4, ex:['Je vais bien.','我很好。']},
-    {fr:'c\'est', ipa:'sɛ', zh:'這是…', pos:'phrase', cat:4, ex:['C\'est une table.','這是一張桌子。']},
+    {fr:'c\'est', ipa:'sɛ', zh:'這是…／它是…（this is / it is）', pos:'phrase', cat:9, ex:['C\'est une table.','這是一張桌子。']},
     {fr:'Je vais bien', ipa:'ʒə vɛ bjɛ̃', zh:'我很好', pos:'phrase', cat:0, ex:['Je vais bien, merci.','我很好，謝謝。']},
     {fr:'Et vous ?', ipa:'e vu', zh:'那您呢？', pos:'phrase', cat:0, ex:['Et vous ?','那您呢？']},
+    {fr:"S'il vous plaît", ipa:'sil vu plɛ', zh:'請（對您，敬語）', pos:'phrase', cat:0, note:"s'il = si + il；vous 表示對您或對不熟的人。放在句尾提出請求", ex:["Un thé, s'il vous plaît.",'請給我一杯茶。']},
     {fr:'île', ipa:'il', zh:'島', pos:'n', g:'f', cat:3, note:'î 讀 [i]，和 il 同音', ex:['C\'est une île.','這是一座島。']},
     {fr:'maïs', ipa:'mais', zh:'玉米', pos:'n', g:'m', cat:3, note:'ï 讀 [i]；這裡的 s 要發音', ex:['Le maïs et le thé.','玉米和茶。']},
     {fr:'lyre', ipa:'lir', zh:'豎琴', pos:'n', g:'f', cat:3, note:'y 讀 [i]', ex:['C\'est une lyre.','這是一把豎琴。']},
@@ -418,7 +440,63 @@ const LESSONS = [L0, {
     {fr:'ton', ipa:'tɔ̃', zh:'你的（接陽性名詞）', pos:'poss', g:'m', cat:6, ex:['Ton thé.','你的茶。']},
     {fr:'ta', ipa:'ta', zh:'你的（接陰性名詞）', pos:'poss', g:'f', cat:6, note:'課堂拼讀練習裡的 ta 就是這個字', ex:['Ta table.','你的桌子。']},
     {fr:'son', ipa:'sɔ̃', zh:'他的／她的／它的（接陽性名詞）', pos:'poss', g:'m', cat:6, ex:['Son thé.','他（她）的茶。']},
-    {fr:'sa', ipa:'sa', zh:'他的／她的／它的（接陰性名詞）', pos:'poss', g:'f', cat:6, ex:['Sa tasse.','他（她）的杯子。']}
+    {fr:'sa', ipa:'sa', zh:'他的／她的／它的（接陰性名詞）', pos:'poss', g:'f', cat:6, ex:['Sa tasse.','他（她）的杯子。']},
+    {"fr": "tu", "ipa": "ty", "zh": "你（非正式）", "pos": "pron", "cat": 8, "note": "對朋友、家人、同輩用；對長輩或不熟的人用 vous", "ex": ["Tu es Sophie.", "你是 Sophie。"]},
+    {"fr": "elle", "ipa": "ɛl", "zh": "她／它（陰性）", "pos": "pron", "cat": 8, "note": "也可以指陰性的物品（la table → elle）", "ex": ["Elle est Julie.", "她是 Julie。"]},
+    {"fr": "on", "ipa": "ɔ̃", "zh": "我們（口語）／人們", "pos": "pron", "cat": 8, "note": "口語中常取代 nous；on 後面的動詞用 il 的形式", "ex": ["On est Paul et Léa.", "我們是 Paul 和 Léa。"]},
+    {"fr": "nous", "ipa": "nu", "zh": "我們", "pos": "pron", "cat": 8, "note": "nous 的 s 在母音前連音成 [z]", "ex": ["Nous sommes Paul et Léa.", "我們是 Paul 和 Léa。"]},
+    {"fr": "ils", "ipa": "il", "zh": "他們（陽性或男女混合）", "pos": "pron", "cat": 8, "note": "全是男性，或男女混合，都用 ils", "ex": ["Ils sont Paul et Théo.", "他們是 Paul 和 Théo。"]},
+    {"fr": "elles", "ipa": "ɛl", "zh": "她們", "pos": "pron", "cat": 8, "note": "全部是女性才用 elles", "ex": ["Elles sont Alice et Emma.", "她們是 Alice 和 Emma。"]},
+    {"fr": "être", "ipa": "ɛtr", "zh": "是／在（動詞原形，to be）", "pos": "v", "cat": 9, "note": "不規則動詞，是法語最常用的動詞之一", "ex": ["Être bien, c'est très bien.", "感覺好，就是很好。"]},
+    {"fr": "suis", "ipa": "sɥi", "zh": "是（je 的變位）", "pos": "v", "cat": 9, "ex": ["Je suis Louis.", "我是 Louis。"]},
+    {"fr": "es", "ipa": "ɛ", "zh": "是（tu 的變位）", "pos": "v", "cat": 9, "note": "和 est 同音 [ɛ]，要靠主詞分辨", "ex": ["Tu es Sophie.", "你是 Sophie。"]},
+    {"fr": "est", "ipa": "ɛ", "zh": "是（il／elle／on 的變位）", "pos": "v", "cat": 9, "note": "和 es 同音 [ɛ]；也不要和 et（和）混淆", "ex": ["Il est Hugo.", "他是 Hugo。"]},
+    {"fr": "sommes", "ipa": "sɔm", "zh": "是（nous 的變位）", "pos": "v", "cat": 9, "ex": ["Nous sommes Paul et Léa.", "我們是 Paul 和 Léa。"]},
+    {"fr": "êtes", "ipa": "ɛt", "zh": "是（vous 的變位）", "pos": "v", "cat": 9, "note": "vous êtes 要連音成 [vu zɛt]", "ex": ["Vous êtes Thomas.", "您是 Thomas。"]},
+    {"fr": "sont", "ipa": "sɔ̃", "zh": "是（ils／elles 的變位）", "pos": "v", "cat": 9, "note": "和 son（他的）同音 [sɔ̃]", "ex": ["Ils sont Paul et Théo.", "他們是 Paul 和 Théo。"]},
+    {"fr": "ne", "ipa": "nə", "zh": "不（否定詞，和 pas 夾住動詞）", "pos": "adv", "cat": 10, "note": "ne 遇到母音開頭的字縮成 n'（n'est、n'es）；口語常省略 ne", "ex": ["Je ne suis pas Louis.", "我不是 Louis。"]},
+    {"fr": "oui", "ipa": "wi", "zh": "是的／對", "pos": "adv", "cat": 10, "ex": ["Oui, je suis Louis.", "是的，我是 Louis。"]},
+    {"fr": "non", "ipa": "nɔ̃", "zh": "不／不是", "pos": "adv", "cat": 10, "note": "和 nom（名字）、on（我們）音近", "ex": ["Non, je ne suis pas Louis.", "不，我不是 Louis。"]},
+    {"fr": "Est-ce que", "ipa": "ɛs kə", "zh": "…嗎？（疑問句開頭）", "pos": "phrase", "cat": 11, "note": "放在陳述句前面就能變成疑問句，不用倒裝", "ex": ["Est-ce que tu es Sophie ?", "你是 Sophie 嗎？"]},
+    {"fr": "Je suis", "ipa": "ʒə sɥi", "zh": "我是（I am）", "pos": "phrase", "cat": 9, "ex": ["Je suis Louis.", "我是 Louis。"]},
+    {"fr": "Je ne suis pas", "ipa": "ʒə nə sɥi pa", "zh": "我不是（I am not）", "pos": "phrase", "cat": 10, "ex": ["Je ne suis pas Louis.", "我不是 Louis。"]},
+    {"fr": "Suis-je ?", "ipa": "sɥiʒ", "zh": "我是…嗎？（am I）", "pos": "phrase", "cat": 11, "note": "書面或較正式；日常多說 Est-ce que je suis … ?", "ex": ["Suis-je Louis ?", "我是 Louis 嗎？"]},
+    {"fr": "Ne suis-je pas ?", "ipa": "nə sɥiʒ pa", "zh": "我不是…嗎？（am I not）", "pos": "phrase", "cat": 12, "note": "否定疑問：ne + 倒裝 + pas，把動詞和主詞夾在中間", "ex": ["Ne suis-je pas Louis ?", "我不是 Louis 嗎？"]},
+    {"fr": "Tu es", "ipa": "ty ɛ", "zh": "你是（you are）", "pos": "phrase", "cat": 9, "ex": ["Tu es Sophie.", "你是 Sophie。"]},
+    {"fr": "Tu n'es pas", "ipa": "ty nɛ pa", "zh": "你不是（you are not）", "pos": "phrase", "cat": 10, "note": "ne 遇到母音縮成 n'", "ex": ["Tu n'es pas Sophie.", "你不是 Sophie。"]},
+    {"fr": "Es-tu ?", "ipa": "ɛ ty", "zh": "你是…嗎？（are you）", "pos": "phrase", "cat": 11, "note": "倒裝：動詞放在主詞前面，中間加連字號", "ex": ["Es-tu Sophie ?", "你是 Sophie 嗎？"]},
+    {"fr": "N'es-tu pas ?", "ipa": "nɛ ty pa", "zh": "你不是…嗎？（aren't you）", "pos": "phrase", "cat": 12, "note": "否定疑問：ne + 倒裝 + pas，把動詞和主詞夾在中間", "ex": ["N'es-tu pas Sophie ?", "你不是 Sophie 嗎？"]},
+    {"fr": "Il est", "ipa": "il ɛ", "zh": "他是／它是（he is / it is）", "pos": "phrase", "cat": 9, "ex": ["Il est Hugo.", "他是 Hugo。"]},
+    {"fr": "Il n'est pas", "ipa": "il nɛ pa", "zh": "他不是／它不是（he is not / it is not）", "pos": "phrase", "cat": 10, "note": "ne 遇到母音縮成 n'", "ex": ["Il n'est pas Hugo.", "他不是 Hugo。"]},
+    {"fr": "Est-il ?", "ipa": "ɛ til", "zh": "他是…嗎？（is he / is it）", "pos": "phrase", "cat": 11, "note": "倒裝：動詞放在主詞前面，中間加連字號", "ex": ["Est-il Hugo ?", "他是 Hugo 嗎？"]},
+    {"fr": "N'est-il pas ?", "ipa": "nɛ til pa", "zh": "他不是…嗎？（isn't he）", "pos": "phrase", "cat": 12, "note": "否定疑問：ne + 倒裝 + pas，把動詞和主詞夾在中間", "ex": ["N'est-il pas Hugo ?", "他不是 Hugo 嗎？"]},
+    {"fr": "Elle est", "ipa": "ɛl ɛ", "zh": "她是／它是（she is / it is）", "pos": "phrase", "cat": 9, "ex": ["Elle est Julie.", "她是 Julie。"]},
+    {"fr": "Elle n'est pas", "ipa": "ɛl nɛ pa", "zh": "她不是／它不是（she is not / it is not）", "pos": "phrase", "cat": 10, "note": "ne 遇到母音縮成 n'", "ex": ["Elle n'est pas Julie.", "她不是 Julie。"]},
+    {"fr": "Est-elle ?", "ipa": "ɛ tɛl", "zh": "她是…嗎？（is she / is it）", "pos": "phrase", "cat": 11, "note": "倒裝：動詞放在主詞前面，中間加連字號", "ex": ["Est-elle Julie ?", "她是 Julie 嗎？"]},
+    {"fr": "N'est-elle pas ?", "ipa": "nɛ tɛl pa", "zh": "她不是…嗎？（isn't she）", "pos": "phrase", "cat": 12, "note": "否定疑問：ne + 倒裝 + pas，把動詞和主詞夾在中間", "ex": ["N'est-elle pas Julie ?", "她不是 Julie 嗎？"]},
+    {"fr": "On est", "ipa": "ɔ̃ nɛ", "zh": "我們是（口語 we are）", "pos": "phrase", "cat": 9, "note": "on 後的 n 連音：[ɔ̃ nɛ]", "ex": ["On est Paul et Léa.", "我們是 Paul 和 Léa。"]},
+    {"fr": "On n'est pas", "ipa": "ɔ̃ nɛ pa", "zh": "我們不是（口語 we are not）", "pos": "phrase", "cat": 10, "note": "ne 遇到母音縮成 n'", "ex": ["On n'est pas Paul et Léa.", "我們不是 Paul 和 Léa。"]},
+    {"fr": "Nous sommes", "ipa": "nu sɔm", "zh": "我們是（we are）", "pos": "phrase", "cat": 9, "ex": ["Nous sommes Paul et Léa.", "我們是 Paul 和 Léa。"]},
+    {"fr": "Nous ne sommes pas", "ipa": "nu nə sɔm pa", "zh": "我們不是（we are not）", "pos": "phrase", "cat": 10, "ex": ["Nous ne sommes pas Paul et Léa.", "我們不是 Paul 和 Léa。"]},
+    {"fr": "Sommes-nous ?", "ipa": "sɔm nu", "zh": "我們是…嗎？（are we）", "pos": "phrase", "cat": 11, "note": "倒裝：動詞放在主詞前面，中間加連字號", "ex": ["Sommes-nous Paul et Léa ?", "我們是 Paul 和 Léa 嗎？"]},
+    {"fr": "Ne sommes-nous pas ?", "ipa": "nə sɔm nu pa", "zh": "我們不是…嗎？（aren't we）", "pos": "phrase", "cat": 12, "note": "否定疑問：ne + 倒裝 + pas，把動詞和主詞夾在中間", "ex": ["Ne sommes-nous pas Paul et Léa ?", "我們不是 Paul 和 Léa 嗎？"]},
+    {"fr": "Vous êtes", "ipa": "vu zɛt", "zh": "您是／你們是（you are）", "pos": "phrase", "cat": 9, "note": "連音：vous 的 s 讀 [z]", "ex": ["Vous êtes Thomas.", "您是 Thomas。"]},
+    {"fr": "Vous n'êtes pas", "ipa": "vu nɛt pa", "zh": "您不是／你們不是（you are not）", "pos": "phrase", "cat": 10, "note": "ne 遇到母音縮成 n'", "ex": ["Vous n'êtes pas Thomas.", "您不是 Thomas。"]},
+    {"fr": "Êtes-vous ?", "ipa": "ɛt vu", "zh": "您是…嗎？／你們是…嗎？（are you）", "pos": "phrase", "cat": 11, "note": "倒裝：動詞放在主詞前面，中間加連字號", "ex": ["Êtes-vous Thomas ?", "您是 Thomas 嗎？"]},
+    {"fr": "N'êtes-vous pas ?", "ipa": "nɛt vu pa", "zh": "您不是…嗎？（aren't you）", "pos": "phrase", "cat": 12, "note": "否定疑問：ne + 倒裝 + pas，把動詞和主詞夾在中間", "ex": ["N'êtes-vous pas Thomas ?", "您不是 Thomas 嗎？"]},
+    {"fr": "Ils sont", "ipa": "il sɔ̃", "zh": "他們是（they are）", "pos": "phrase", "cat": 9, "ex": ["Ils sont Paul et Théo.", "他們是 Paul 和 Théo。"]},
+    {"fr": "Ils ne sont pas", "ipa": "il nə sɔ̃ pa", "zh": "他們不是（they are not）", "pos": "phrase", "cat": 10, "ex": ["Ils ne sont pas Paul et Théo.", "他們不是 Paul 和 Théo。"]},
+    {"fr": "Sont-ils ?", "ipa": "sɔ̃ til", "zh": "他們是…嗎？（are they）", "pos": "phrase", "cat": 11, "note": "倒裝：動詞放在主詞前面，中間加連字號", "ex": ["Sont-ils Paul et Théo ?", "他們是 Paul 和 Théo 嗎？"]},
+    {"fr": "Ne sont-ils pas ?", "ipa": "nə sɔ̃ til pa", "zh": "他們不是…嗎？（aren't they）", "pos": "phrase", "cat": 12, "note": "否定疑問：ne + 倒裝 + pas，把動詞和主詞夾在中間", "ex": ["Ne sont-ils pas Paul et Théo ?", "他們不是 Paul 和 Théo 嗎？"]},
+    {"fr": "Elles sont", "ipa": "ɛl sɔ̃", "zh": "她們是（they are, f.）", "pos": "phrase", "cat": 9, "ex": ["Elles sont Alice et Emma.", "她們是 Alice 和 Emma。"]},
+    {"fr": "Elles ne sont pas", "ipa": "ɛl nə sɔ̃ pa", "zh": "她們不是（they are not, f.）", "pos": "phrase", "cat": 10, "ex": ["Elles ne sont pas Alice et Emma.", "她們不是 Alice 和 Emma。"]},
+    {"fr": "Sont-elles ?", "ipa": "sɔ̃ tɛl", "zh": "她們是…嗎？（are they, f.）", "pos": "phrase", "cat": 11, "note": "倒裝：動詞放在主詞前面，中間加連字號", "ex": ["Sont-elles Alice et Emma ?", "她們是 Alice 和 Emma 嗎？"]},
+    {"fr": "Ne sont-elles pas ?", "ipa": "nə sɔ̃ tɛl pa", "zh": "她們不是…嗎？（aren't they, f.）", "pos": "phrase", "cat": 12, "note": "否定疑問：ne + 倒裝 + pas，把動詞和主詞夾在中間", "ex": ["Ne sont-elles pas Alice et Emma ?", "她們不是 Alice 和 Emma 嗎？"]},
+    {"fr": "Ce sont", "ipa": "sə sɔ̃", "zh": "這些是／那些是（these/those are）", "pos": "phrase", "cat": 9, "note": "c'est 的複數；c'est 對應 this is / that is / it is", "ex": ["Ce sont Paul et Léa.", "這些是 Paul 和 Léa。"]},
+    {"fr": "Ce n'est pas", "ipa": "sə nɛ pa", "zh": "這不是…／它不是…（this is not）", "pos": "phrase", "cat": 10, "ex": ["Ce n'est pas une table.", "這不是一張桌子。"]},
+    {"fr": "Ce ne sont pas", "ipa": "sə nə sɔ̃ pa", "zh": "這些不是／那些不是（those are not）", "pos": "phrase", "cat": 10, "ex": ["Ce ne sont pas Paul et Léa.", "這些不是 Paul 和 Léa。"]},
+    {"fr": "Est-ce ?", "ipa": "ɛs", "zh": "這是…嗎？／它是…嗎？（is it）", "pos": "phrase", "cat": 11, "note": "也可以直接用升調：C'est une table ?", "ex": ["Est-ce une table ?", "這是一張桌子嗎？"]},
+    {"fr": "N'est-ce pas ?", "ipa": "nɛs pa", "zh": "不是嗎？／對吧？（附加問句）", "pos": "phrase", "cat": 12, "note": "放在句尾，徵求對方同意", "ex": ["C'est une table, n'est-ce pas ?", "這是桌子，對吧？"]}
   ],
   grammar:[
     {h:'音節 syllabe', tag:'語音', p:['法語共有 35 個音素：15 個元音、17 個輔音、3 個半元音。','一個元音音素 = 一個音節。ma 有 1 個音節，papa 有 2 個。','以元音結尾的是開音節，如 [ma]；以輔音結尾的是閉音節，如 [mal]。'],
@@ -435,6 +513,14 @@ const LESSONS = [L0, {
       ex:[['un animal','œ̃n animal','一隻動物（m.）'],['une table','yn tabl','一張桌子（f.）'],['un thé','œ̃ te','一杯茶（m.）'],['la pyramide','la piramid','那座金字塔（f.）']]},
     {h:'稱呼與寒暄', tag:'對話', p:['Madame（女士）、Monsieur（先生）、Mademoiselle（小姐）接在 Bonjour 後面表示禮貌。','Comment allez-vous ? 用 vous，是正式的「您好嗎」；回答 Je vais bien, merci. 再反問 Et vous ?。','Moi aussi = 我也是。'],
       ex:[['Comment allez-vous ?','kɔmɑ̃ tale vu','您好嗎？'],['Je vais bien, merci.','ʒə vɛ bjɛ̃ mɛrsi','我很好，謝謝。'],['Et vous ?','e vu','那您呢？']]},
+    {"h": "動詞 être（是）：現在式變位", "tag": "延伸補充", "ext": true, "p": ["être 是「是／在」，相當於英語的 am / is / are，變位要跟主詞一致。", "il、elle、on 都用 est。", "es 和 est 都讀 [ɛ]，sont 和 son（他的）都讀 [sɔ̃]，聽的時候要靠主詞分辨。"], "ex": [["je suis", "ʒə sɥi", "我是 (I am)"], ["tu es", "ty ɛ", "你是 (you are)"], ["il est", "il ɛ", "他是／它是 (he/it is)"], ["elle est", "ɛl ɛ", "她是／它是 (she/it is)"], ["on est", "ɔ̃ nɛ", "我們是，口語 (we are)"], ["nous sommes", "nu sɔm", "我們是 (we are)"], ["vous êtes", "vu zɛt", "您是／你們是 (you are)"], ["ils sont", "il sɔ̃", "他們是 (they are)"], ["elles sont", "ɛl sɔ̃", "她們是 (they are, f.)"]]},
+    {"h": "主詞代名詞", "tag": "延伸補充", "ext": true, "p": ["單數：je（我）、tu（你，非正式）、il（他）、elle（她）、on（我們／人們，口語）。", "複數：nous（我們）、vous（您／你們）、ils（他們）、elles（她們）。", "vous 同時是「您」（敬語）和「你們」；ils 是全男性或男女混合；elles 只用於全女性。", "il / elle 也可以指物品，由名詞的陰陽性決定：le style → il，la table → elle。"], "ex": [["je", "ʒə", "我"], ["tu", "ty", "你"], ["nous", "nu", "我們"], ["ils", "il", "他們"], ["elles", "ɛl", "她們"]]},
+    {"h": "this is / those are / it is", "tag": "延伸補充", "ext": true, "p": ["this is、that is、it is（介紹眼前的人或東西）都用 c'est + 名詞：C'est une table.", "those are、these are 用 ce sont + 複數名詞：Ce sont Paul et Léa.", "it is 指已經提過的東西時，用 il est / elle est，後面接形容詞：La table ? Elle est nette."], "ex": [["C'est une table.", "sɛ yn tabl", "這是一張桌子 (this is)"], ["Ce sont Paul et Léa.", "sə sɔ̃ pol e lea", "這些是 Paul 和 Léa (those are)"], ["Elle est nette.", "ɛl ɛ nɛt", "它（桌子）很乾淨 (it is)"], ["Il est solennel.", "il ɛ sɔlanɛl", "它（風格）很莊嚴 (it is)"]]},
+    {"h": "否定句：ne … pas", "tag": "延伸補充", "ext": true, "p": ["否定用 ne … pas 把動詞夾在中間：je ne suis pas。", "ne 遇到母音（或啞音 h）開頭的動詞，縮成 n'：tu n'es pas、il n'est pas、vous n'êtes pas。", "c'est 的否定是 ce n'est pas；ce sont 的否定是 ce ne sont pas。", "口語常省略 ne，直接說 je suis pas，但寫作文要寫完整。", "回答用 oui（是）或 non（不）。"], "ex": [["Je ne suis pas Louis.", "ʒə nə sɥi pa lwi", "我不是 Louis (I am not)"], ["Tu n'es pas Sophie.", "ty nɛ pa sɔfi", "你不是 Sophie (you are not)"], ["Il n'est pas Hugo.", "il nɛ pa ygo", "他不是 Hugo (he is not)"], ["Elle n'est pas Julie.", "ɛl nɛ pa ʒyli", "她不是 Julie (she is not)"], ["Nous ne sommes pas Paul et Léa.", "nu nə sɔm pa pol e lea", "我們不是 Paul 和 Léa (we are not)"], ["Ils ne sont pas Paul et Théo.", "il nə sɔ̃ pa pol e teo", "他們不是 Paul 和 Théo (they are not)"], ["Ce n'est pas une table.", "sə nɛ pa yn tabl", "這不是一張桌子 (this is not)"]]},
+    {"h": "疑問句：am I / are you / is he…", "tag": "延伸補充", "ext": true, "p": ["三種問法：① 升調：Tu es Sophie ? ② Est-ce que + 陳述句：Est-ce que tu es Sophie ? ③ 倒裝（動詞放主詞前，中間加連字號）：Es-tu Sophie ?", "倒裝的形式：suis-je（am I）、es-tu（are you）、est-il（is he）、est-elle（is she）、sommes-nous（are we）、êtes-vous（are you）、sont-ils / sont-elles（are they）、est-ce（is it）。", "suis-je 偏書面，日常問「我是…嗎？」多用 Est-ce que je suis … ?。", "est-il、est-elle、sont-ils 連音：[ɛ til]、[ɛ tɛl]、[sɔ̃ til]。"], "ex": [["Suis-je Louis ?", "sɥiʒ lwi", "我是 Louis 嗎？ (am I)"], ["Es-tu Sophie ?", "ɛ ty sɔfi", "你是 Sophie 嗎？ (are you)"], ["Est-il Hugo ?", "ɛ til ygo", "他是 Hugo 嗎？ (is he)"], ["Est-elle Julie ?", "ɛ tɛl ʒyli", "她是 Julie 嗎？ (is she)"], ["Sommes-nous Paul et Léa ?", "sɔm nu pol e lea", "我們是 Paul 和 Léa 嗎？ (are we)"], ["Êtes-vous Thomas ?", "ɛt vu tɔma", "您是 Thomas 嗎？ (are you)"], ["Sont-ils Paul et Théo ?", "sɔ̃ til pol e teo", "他們是 Paul 和 Théo 嗎？ (are they)"], ["Est-ce une table ?", "ɛs yn tabl", "這是一張桌子嗎？ (is it)"]]},
+    {"h": "否定疑問句：aren't you…", "tag": "延伸補充", "ext": true, "p": ["把倒裝的動詞和主詞用 ne … pas 夾住：Ne suis-je pas … ?、N'es-tu pas … ?、N'est-il pas … ?", "句尾加 n'est-ce pas ? 是附加問句，相當於「對吧？」。"], "ex": [["Ne suis-je pas Louis ?", "nə sɥiʒ pa lwi", "我不是 Louis 嗎？ (am I not)"], ["N'es-tu pas Sophie ?", "nɛ ty pa sɔfi", "你不是 Sophie 嗎？ (aren't you)"], ["N'est-il pas Hugo ?", "nɛ til pa ygo", "他不是 Hugo 嗎？ (isn't he)"], ["N'est-elle pas Julie ?", "nɛ tɛl pa ʒyli", "她不是 Julie 嗎？ (isn't she)"], ["N'êtes-vous pas Thomas ?", "nɛt vu pa tɔma", "您不是 Thomas 嗎？ (aren't you)"], ["Ne sont-ils pas Paul et Théo ?", "nə sɔ̃ til pa pol e teo", "他們不是 Paul 和 Théo 嗎？ (aren't they)"], ["C'est une table, n'est-ce pas ?", "sɛ yn tabl nɛs pa", "這是桌子，對吧？"]]},
+    {h:"請求：S'il vous plaît", tag:'延伸補充', ext:true, p:["想請對方給你東西：名詞 + s'il vous plaît，意思是「請給我…」。","想叫住人、請對方幫忙：稱呼 + s'il vous plaît，意思是「請問一下」。",'vous 是對您的敬語；對朋友或家人說 s\'il te plaît。'],
+      ex:[["Un thé, s'il vous plaît.",'œ̃ te sil vu plɛ','請給我一杯茶。'],["Une table, s'il vous plaît.",'yn tabl sil vu plɛ','請給我一張桌子。'],["Madame, s'il vous plaît !",'madam sil vu plɛ','女士，請問一下！']]},
     {h:'所有格：mon ma ton ta son sa', tag:'延伸補充', ext:true, p:['我的 mon / ma、你的 ton / ta、他（她）的 son / sa。','所有格要跟「後面那個名詞」的陰陽性一致，和擁有者的性別無關：陽性名詞用 mon、ton、son，陰性名詞用 ma、ta、sa。','son / sa 可以是「他的」也可以是「她的」，要看語境。複數是 mes、tes、ses（補充，尚未收進單字）。'],
       ex:[['mon papa','mɔ̃ papa','我的爸爸（m.）'],['ma mamie','ma mami','我的奶奶（f.）'],['ton thé','tɔ̃ te','你的茶（m.）'],['ta table','ta tabl','你的桌子（f.）'],['son thé','sɔ̃ te','他（她）的茶（m.）'],['sa tasse','sa tas','他（她）的杯子（f.）']]},
     {h:'句型：C\'est + 冠詞 + 名詞', tag:'延伸補充', ext:true, p:['C\'est… = 這是…。後面接 un / une / le / la + 名詞，就能用今天的單字造很多句子。'],
@@ -487,7 +573,63 @@ const LESSONS = [L0, {
     ["C'est une lyre.",'這是一把豎琴。',['lyre']],
     ["C'est une tête.",'這是一顆頭。',['tête']],
     ['Une nappe pâle.','一塊蒼白的桌布。',['nappe','pâle']],
-    ['Une table nette.','一張乾淨的桌子。',['table','nette']]
+    ['Une table nette.','一張乾淨的桌子。',['table','nette']],
+    ["Un thé, s'il vous plaît.",'請給我一杯茶。',['thé',"S'il vous plaît"]],
+    ["Une tasse, s'il vous plaît.",'請給我一個杯子。',['tasse',"S'il vous plaît"]],
+    ["Une table, s'il vous plaît.",'請給我一張桌子。',['table',"S'il vous plaît"]],
+    ["Une nappe, s'il vous plaît.",'請給我一塊桌布。',['nappe',"S'il vous plaît"]],
+    ["Une pile, s'il vous plaît.",'請給我一顆電池。',['pile',"S'il vous plaît"]],
+    ["Madame, s'il vous plaît !",'女士，請問一下！',['madame',"S'il vous plaît"]],
+    ["Monsieur, s'il vous plaît !",'先生，請問一下！',['monsieur',"S'il vous plaît"]],
+    ["Mademoiselle, s'il vous plaît !",'小姐，請問一下！',['mademoiselle',"S'il vous plaît"]],
+    ["Je suis Louis.", "我是 Louis。", ["Je suis"], "「是」肯定句（am / is / are）"],
+    ["Tu es Sophie.", "你是 Sophie。", ["Tu es"], "「是」肯定句（am / is / are）"],
+    ["Il est Hugo.", "他是 Hugo。", ["Il est"], "「是」肯定句（am / is / are）"],
+    ["Elle est Julie.", "她是 Julie。", ["Elle est"], "「是」肯定句（am / is / are）"],
+    ["On est Paul et Léa.", "我們是 Paul 和 Léa。", ["On est", "et"], "「是」肯定句（am / is / are）"],
+    ["Nous sommes Paul et Léa.", "我們是 Paul 和 Léa。", ["Nous sommes", "et"], "「是」肯定句（am / is / are）"],
+    ["Vous êtes Thomas.", "您是 Thomas。", ["Vous êtes"], "「是」肯定句（am / is / are）"],
+    ["Ils sont Paul et Théo.", "他們是 Paul 和 Théo。", ["Ils sont", "et"], "「是」肯定句（am / is / are）"],
+    ["Elles sont Alice et Emma.", "她們是 Alice 和 Emma。", ["Elles sont", "et"], "「是」肯定句（am / is / are）"],
+    ["C'est Paul.", "這是 Paul。（this is）", ["c'est"], "「是」肯定句（am / is / are）"],
+    ["Ce sont Paul et Léa.", "這些是 Paul 和 Léa。（those are）", ["Ce sont", "et"], "「是」肯定句（am / is / are）"],
+    ["Elle est pâle.", "它（她）很蒼白。（it is / she is）", ["Elle est", "pâle"], "「是」肯定句（am / is / are）"],
+    ["Le style est solennel.", "這種風格很莊嚴。（it is）", ["style", "est", "solennel"], "「是」肯定句（am / is / are）"],
+    ["Être bien, c'est très bien.", "感覺好，就是很好。", ["être", "c'est", "Très bien"], "「是」肯定句（am / is / are）"],
+    ["Oui, je suis Louis.", "是的，我是 Louis。", ["oui", "Je suis"], "「是」肯定句（am / is / are）"],
+    ["Je ne suis pas Louis.", "我不是 Louis。", ["Je ne suis pas", "ne"], "「是」否定句（not）"],
+    ["Tu n'es pas Sophie.", "你不是 Sophie。", ["Tu n'es pas", "ne"], "「是」否定句（not）"],
+    ["Il n'est pas Hugo.", "他不是 Hugo。", ["Il n'est pas", "ne"], "「是」否定句（not）"],
+    ["Elle n'est pas Julie.", "她不是 Julie。", ["Elle n'est pas", "ne"], "「是」否定句（not）"],
+    ["On n'est pas Paul et Léa.", "我們不是 Paul 和 Léa。", ["On n'est pas", "et", "ne"], "「是」否定句（not）"],
+    ["Nous ne sommes pas Paul et Léa.", "我們不是 Paul 和 Léa。", ["Nous ne sommes pas", "et", "ne"], "「是」否定句（not）"],
+    ["Vous n'êtes pas Thomas.", "您不是 Thomas。", ["Vous n'êtes pas", "ne"], "「是」否定句（not）"],
+    ["Ils ne sont pas Paul et Théo.", "他們不是 Paul 和 Théo。", ["Ils ne sont pas", "et", "ne"], "「是」否定句（not）"],
+    ["Elles ne sont pas Alice et Emma.", "她們不是 Alice 和 Emma。", ["Elles ne sont pas", "et", "ne"], "「是」否定句（not）"],
+    ["Ce n'est pas une table.", "這不是一張桌子。", ["Ce n'est pas", "table"], "「是」否定句（not）"],
+    ["Ce ne sont pas Paul et Léa.", "這些不是 Paul 和 Léa。", ["Ce ne sont pas", "et"], "「是」否定句（not）"],
+    ["Non, je ne suis pas Louis.", "不，我不是 Louis。", ["non", "Je ne suis pas"], "「是」否定句（not）"],
+    ["Suis-je Louis ?", "我是 Louis 嗎？", ["Suis-je ?"], "「是」疑問句（am I / are you / is he…）"],
+    ["Es-tu Sophie ?", "你是 Sophie 嗎？", ["Es-tu ?"], "「是」疑問句（am I / are you / is he…）"],
+    ["Est-il Hugo ?", "他是 Hugo 嗎？", ["Est-il ?"], "「是」疑問句（am I / are you / is he…）"],
+    ["Est-elle Julie ?", "她是 Julie 嗎？", ["Est-elle ?"], "「是」疑問句（am I / are you / is he…）"],
+    ["Sommes-nous Paul et Léa ?", "我們是 Paul 和 Léa 嗎？", ["Sommes-nous ?", "et"], "「是」疑問句（am I / are you / is he…）"],
+    ["Êtes-vous Thomas ?", "您是 Thomas 嗎？", ["Êtes-vous ?"], "「是」疑問句（am I / are you / is he…）"],
+    ["Sont-ils Paul et Théo ?", "他們是 Paul 和 Théo 嗎？", ["Sont-ils ?", "et"], "「是」疑問句（am I / are you / is he…）"],
+    ["Sont-elles Alice et Emma ?", "她們是 Alice 和 Emma 嗎？", ["Sont-elles ?", "et"], "「是」疑問句（am I / are you / is he…）"],
+    ["Est-ce que je suis Louis ?", "我是 Louis 嗎？（日常常用，代替 Suis-je ?）", ["Est-ce que", "Je suis"], "「是」疑問句（am I / are you / is he…）"],
+    ["Est-ce que tu es Sophie ?", "你是 Sophie 嗎？", ["Est-ce que", "Tu es"], "「是」疑問句（am I / are you / is he…）"],
+    ["Est-ce une table ?", "這是一張桌子嗎？（is it）", ["Est-ce ?", "table"], "「是」疑問句（am I / are you / is he…）"],
+    ["C'est une table ?", "這是桌子嗎？（升調）", ["c'est", "table"], "「是」疑問句（am I / are you / is he…）"],
+    ["Ne suis-je pas Louis ?", "我不是 Louis 嗎？", ["Ne suis-je pas ?"], "「是」否定疑問句（aren't you…）"],
+    ["N'es-tu pas Sophie ?", "你不是 Sophie 嗎？", ["N'es-tu pas ?"], "「是」否定疑問句（aren't you…）"],
+    ["N'est-il pas Hugo ?", "他不是 Hugo 嗎？", ["N'est-il pas ?"], "「是」否定疑問句（aren't you…）"],
+    ["N'est-elle pas Julie ?", "她不是 Julie 嗎？", ["N'est-elle pas ?"], "「是」否定疑問句（aren't you…）"],
+    ["Ne sommes-nous pas Paul et Léa ?", "我們不是 Paul 和 Léa 嗎？", ["Ne sommes-nous pas ?", "et"], "「是」否定疑問句（aren't you…）"],
+    ["N'êtes-vous pas Thomas ?", "您不是 Thomas 嗎？", ["N'êtes-vous pas ?"], "「是」否定疑問句（aren't you…）"],
+    ["Ne sont-ils pas Paul et Théo ?", "他們不是 Paul 和 Théo 嗎？", ["Ne sont-ils pas ?", "et"], "「是」否定疑問句（aren't you…）"],
+    ["Ne sont-elles pas Alice et Emma ?", "她們不是 Alice 和 Emma 嗎？", ["Ne sont-elles pas ?", "et"], "「是」否定疑問句（aren't you…）"],
+    ["C'est une table, n'est-ce pas ?", "這是桌子，對吧？", ["N'est-ce pas ?", "table"], "「是」否定疑問句（aren't you…）"]
   ],
   // 改錯題：err 是錯誤處，opts 是可選的修正，ans 是正解
   fixes:[
@@ -506,7 +648,18 @@ const LESSONS = [L0, {
     {pre:'', err:'Ma', post:' papa.', ans:'Mon', opts:['Mon','Ma','Ta','Sa'], why:'papa 是陽性名詞，「我的」要用 mon，不是 ma。'},
     {pre:'', err:'Mon', post:' tasse.', ans:'Ma', opts:['Ma','Mon','Ton','Son'], why:'tasse 是陰性名詞，「我的」要用 ma，不是 mon。'},
     {pre:'', err:'Ton', post:' table.', ans:'Ta', opts:['Ta','Ton','Ma','Sa'], why:'table 是陰性名詞，「你的」要用 ta，不是 ton。'},
-    {pre:'', err:'Sa', post:' thé.', ans:'Son', opts:['Son','Sa','Ton','Mon'], why:'thé 是陽性名詞，「他（她）的」要用 son，不是 sa。'}
+    {pre:'', err:'Sa', post:' thé.', ans:'Son', opts:['Son','Sa','Ton','Mon'], why:'thé 是陽性名詞，「他（她）的」要用 son，不是 sa。'},
+    {pre:'Un thé, ', err:"s'il vous plait", post:'.', ans:"s'il vous plaît", opts:["s'il vous plaît","s'il vous plait","sil vous plaît","s'il vous plet"], why:"plaît 的 î 有長音符，讀 [plɛ]；s'il 中間要有撇號。"},
+    {"pre": "Je ", "err": "es", "post": " Louis.", "ans": "suis", "opts": ["suis", "es", "est", "sont"], "why": "主詞 je 搭配 être 的變位是 suis（I am）。"},
+    {"pre": "Tu ", "err": "est", "post": " Sophie.", "ans": "es", "opts": ["es", "est", "suis", "êtes"], "why": "主詞 tu 搭配 es（you are）；est 是 il／elle 用的。"},
+    {"pre": "Il ", "err": "es", "post": " Hugo.", "ans": "est", "opts": ["est", "es", "sont", "suis"], "why": "主詞 il 搭配 est（he is）。"},
+    {"pre": "Nous ", "err": "êtes", "post": " Paul et Léa.", "ans": "sommes", "opts": ["sommes", "êtes", "sont", "suis"], "why": "主詞 nous 搭配 sommes（we are）；êtes 是 vous 用的。"},
+    {"pre": "Ils ", "err": "est", "post": " Paul et Théo.", "ans": "sont", "opts": ["sont", "est", "sommes", "êtes"], "why": "主詞 ils（他們）搭配 sont（they are）。"},
+    {"pre": "Je ", "err": "suis pas", "post": " Louis.", "ans": "ne suis pas", "opts": ["ne suis pas", "suis pas ne", "ne suis", "pas suis ne"], "why": "否定要用 ne … pas 把動詞夾在中間：je ne suis pas。"},
+    {"pre": "", "err": "Tu ne es pas", "post": " Sophie.", "ans": "Tu n'es pas", "opts": ["Tu n'es pas", "Tu ne es pas", "Tu nes pas", "Tu n'est pas"], "why": "ne 遇到母音開頭的 es 要縮成 n'：tu n'es pas。"},
+    {"pre": "", "err": "Est il", "post": " Hugo ?", "ans": "Est-il", "opts": ["Est-il", "Est_il", "Es-il", "Est-ill"], "why": "倒裝疑問句的動詞和主詞中間要加連字號：est-il。"},
+    {"pre": "Ce ", "err": "son", "post": " Paul et Léa.", "ans": "sont", "opts": ["sont", "son", "sons", "sonts"], "why": "ce sont 是「這些是」；son（他的）和 sont 同音，但拼寫不同。"},
+    {"pre": "", "err": "Vous êtes pas", "post": " Thomas.", "ans": "Vous n'êtes pas", "opts": ["Vous n'êtes pas", "Vous ne êtes pas", "Vous n'êtes", "Vous êtes ne pas"], "why": "ne 遇到母音（êtes）縮成 n'；否定要 ne … pas。"}
   ]
 }];
 
@@ -592,6 +745,7 @@ const SIM = {
   "pâle":[["blême","蒼白的","近義"]],
   "nette":[["net","乾淨的（陽性）","相關"],["nappe","桌布（形近）","易混"]],
   "solennel":[["formel","正式的","近義"]],
+  "S'il vous plaît":[["S'il te plaît","請（對熟人）","對應"],["Merci","謝謝","相關"]],
   "Ça va ?":[["Comment allez-vous ?","您好嗎？（較正式）","近義"],["Ça va bien","還好","相關"]],
   "Ça va bien":[["Je vais bien","我很好（較正式）","近義"],["Pas mal","不錯","程度相近"]],
   "Et toi ?":[["Et vous ?","那您呢？（正式）","對應"]],
@@ -625,10 +779,13 @@ const EXTRA_EX = {
   "solennel":['Un style solennel.','一種莊嚴的風格。']
 };
 
+Object.assign(SIM, {"être": [["suis", "je 的變位", "相關"], ["est", "il 的變位", "相關"]], "suis": [["suivre", "跟隨（suis 也是它的變位）", "易混"], ["es", "tu 的變位", "相關"]], "es": [["est", "il 的變位（同音）", "同音"], ["suis", "je 的變位", "相關"]], "est": [["es", "tu 的變位（同音）", "同音"], ["et", "和（不同音）", "易混"]], "sommes": [["sont", "ils 的變位", "相關"], ["êtes", "vous 的變位", "相關"]], "êtes": [["sommes", "nous 的變位", "相關"], ["sont", "ils 的變位", "相關"]], "sont": [["son", "他的（同音）", "同音"], ["sommes", "nous 的變位", "相關"]], "ne": [["pas", "不（放在動詞後）", "搭配"], ["non", "不（單獨回答）", "易混"]], "oui": [["non", "不是", "反義"], ["si", "不，才不（反駁否定問句時用）", "相關"]], "non": [["oui", "是的", "反義"], ["pas", "不（否定副詞）", "易混"]], "Est-ce que": [["Est-ce ?", "這是…嗎？", "相關"]], "Ce sont": [["C'est", "這是／它是", "對應"], ["Ils sont", "他們是", "易混"]], "Ce n'est pas": [["C'est", "這是", "反義"]], "Ce ne sont pas": [["Ce sont", "這些是", "反義"]], "Est-ce ?": [["Est-il ?", "他／它是…嗎？", "相關"], ["Est-ce que", "…嗎？", "相關"]], "N'est-ce pas ?": [["Est-ce ?", "這是…嗎？", "相關"]], "Je suis": [["Tu es", "你是", "對應"], ["Il est", "他是／它是", "對應"]], "Je ne suis pas": [["Je suis", "我是", "反義"]], "Suis-je ?": [["Ne suis-je pas ?", "我不是…嗎？", "反義"], ["Je suis", "我是", "相關"]], "Ne suis-je pas ?": [["Suis-je ?", "我是…嗎？", "反義"]], "Tu es": [["Je suis", "我是", "對應"], ["Il est", "他是／它是", "對應"]], "Tu n'es pas": [["Tu es", "你是", "反義"]], "Es-tu ?": [["N'es-tu pas ?", "你不是…嗎？", "反義"], ["Tu es", "你是", "相關"]], "N'es-tu pas ?": [["Es-tu ?", "你是…嗎？", "反義"]], "Il est": [["Je suis", "我是", "對應"], ["Tu es", "你是", "對應"]], "Il n'est pas": [["Il est", "他是／它是", "反義"]], "Est-il ?": [["N'est-il pas ?", "他不是…嗎？", "反義"], ["Il est", "他是／它是", "相關"]], "N'est-il pas ?": [["Est-il ?", "他是…嗎？", "反義"]], "Elle est": [["Je suis", "我是", "對應"], ["Tu es", "你是", "對應"]], "Elle n'est pas": [["Elle est", "她是／它是", "反義"]], "Est-elle ?": [["N'est-elle pas ?", "她不是…嗎？", "反義"], ["Elle est", "她是／它是", "相關"]], "N'est-elle pas ?": [["Est-elle ?", "她是…嗎？", "反義"]], "On est": [["Je suis", "我是", "對應"], ["Tu es", "你是", "對應"]], "On n'est pas": [["On est", "我們是", "反義"]], "Nous sommes": [["Je suis", "我是", "對應"], ["Tu es", "你是", "對應"]], "Nous ne sommes pas": [["Nous sommes", "我們是", "反義"]], "Sommes-nous ?": [["Ne sommes-nous pas ?", "我們不是…嗎？", "反義"], ["Nous sommes", "我們是", "相關"]], "Ne sommes-nous pas ?": [["Sommes-nous ?", "我們是…嗎？", "反義"]], "Vous êtes": [["Je suis", "我是", "對應"], ["Tu es", "你是", "對應"]], "Vous n'êtes pas": [["Vous êtes", "您是／你們是", "反義"]], "Êtes-vous ?": [["N'êtes-vous pas ?", "您不是…嗎？", "反義"], ["Vous êtes", "您是／你們是", "相關"]], "N'êtes-vous pas ?": [["Êtes-vous ?", "您是…嗎？／你們是…嗎？", "反義"]], "Ils sont": [["Je suis", "我是", "對應"], ["Tu es", "你是", "對應"]], "Ils ne sont pas": [["Ils sont", "他們是", "反義"]], "Sont-ils ?": [["Ne sont-ils pas ?", "他們不是…嗎？", "反義"], ["Ils sont", "他們是", "相關"]], "Ne sont-ils pas ?": [["Sont-ils ?", "他們是…嗎？", "反義"]], "Elles sont": [["Je suis", "我是", "對應"], ["Tu es", "你是", "對應"]], "Elles ne sont pas": [["Elles sont", "她們是", "反義"]], "Sont-elles ?": [["Ne sont-elles pas ?", "她們不是…嗎？", "反義"], ["Elles sont", "她們是", "相關"]], "Ne sont-elles pas ?": [["Sont-elles ?", "她們是…嗎？", "反義"]], "tu": [["vous", "您（敬語）", "對應"], ["toi", "你（強調）", "相關"]], "elle": [["il", "他", "對應"], ["elles", "她們（同音）", "同音"]], "on": [["nous", "我們", "近義"]], "nous": [["on", "我們（口語）", "近義"], ["vous", "您／你們", "對應"]], "ils": [["elles", "她們", "對應"], ["il", "他（同音）", "同音"]], "elles": [["ils", "他們", "對應"], ["elle", "她（同音）", "同音"]]});
+SIM['son'] = SIM['son'].concat([['sont','是（ils／elles，同音）','同音']]);
+
 /* 整理資料：幫每筆加上 id */
 LESSONS.forEach(L => {
   L.vocab.forEach(w => { w.lesson = L.id; w.key = w.fr; if(SIM[w.fr]) w.sim = SIM[w.fr]; if(EXTRA_EX[w.fr]) w.ex = EXTRA_EX[w.fr]; });
-  L.sents = L.sentences.map((s,i) => ({id:`${L.id}-s${i}`, fr:s[0], zh:s[1], words:s[2], lesson:L.id}));
+  L.sents = L.sentences.map((s,i) => ({id:`${L.id}-s${i}`, fr:s[0], zh:s[1], words:s[2], grp:s[3]||'', lesson:L.id}));
   L.fixes.forEach((f,i) => { f.id = `${L.id}-f${i}`; f.lesson = L.id; });
 });
 const allVocab = () => LESSONS.flatMap(l => l.vocab);
@@ -684,7 +841,7 @@ const HW = [
    所以「自動」模式下：單字／短片語優先用瀏覽器的法語語音（明確指定 fr-FR 聲音），
    整句才用 Claude 語音；找不到法語聲音時才退回 Claude 語音（明確指定 fr-FR）。
    右上角可手動切換引擎，挑唸得對的那個。 */
-let claudeTTS = null, voiceFR = null;
+let claudeTTS = null, voiceFR = null, voiceZH = null;
 const ENGINE_LABEL = {auto:'自動', browser:'瀏覽器語音', claude:'Claude 語音'};
 let engine = store.get('fr-engine', 'auto');
 try { if (window.claude && claude.use) claude.use('tts').then(t => { claudeTTS = t || null; updateVoiceInfo(); }).catch(()=>{}); } catch(e){}
@@ -694,12 +851,16 @@ function pickVoice(){
     voiceFR = vs.find(v => /^fr[-_]FR$/i.test(v.lang) && /google|amélie|thomas|audrey|marie|hortense|denise|henri/i.test(v.name))
            || vs.find(v => /^fr[-_]FR$/i.test(v.lang)) || vs[0] || null;
   } catch(e){ voiceFR = null; }
+  try {
+    const zs = speechSynthesis.getVoices().filter(v => /^zh/i.test(v.lang.replace('_','-')));
+    voiceZH = zs.find(v => /zh[-_]TW/i.test(v.lang)) || zs.find(v => /zh[-_]HK/i.test(v.lang)) || zs.find(v => /zh[-_]CN/i.test(v.lang)) || zs[0] || null;
+  } catch(e){ voiceZH = null; }
   updateVoiceInfo();
 }
 try { pickVoice(); speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch(e){}
 function updateVoiceInfo(){
   const el = document.getElementById('voiceInfo'); if(!el) return;
-  el.textContent = `瀏覽器法語聲音：${voiceFR ? voiceFR.name : '找不到'} ／ Claude 語音：${claudeTTS ? '可用' : '不可用'}`;
+  el.textContent = `瀏覽器法語聲音：${voiceFR ? voiceFR.name : '找不到'} ／ Claude 語音：${claudeTTS ? '可用' : '不可用'} ／ 瀏覽器中文聲音：${voiceZH ? voiceZH.name : '找不到'}`;
 }
 const wordKeyMap = () => { if(!wordKeyMap.m){ wordKeyMap.m = {}; allVocab().forEach(w => { wordKeyMap.m[w.fr.replace(/\s*\?$/,'').toLowerCase()] = w.say || w.fr; }); } return wordKeyMap.m; };
 function cleanText(text){
@@ -734,8 +895,97 @@ function browserSay(t, rate){
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-say]');
-  if (b) { say(b.dataset.say, b.dataset.slow ? .7 : 1); }
+  if (b) { if (RD.on) readPause(); say(b.dataset.say, b.dataset.slow ? .7 : 1); }
 });
+
+/* ============================ 整頁連續朗讀 ============================
+   把目前分頁裡每個帶 data-pf（法文）／data-pz（中文）的區塊依序唸出來。
+   每個詞：法文兩遍、中文兩遍（或 法中法中，可在「設定」切換）。 */
+const RD = {on:false, i:0, tok:0, q:[], opt:Object.assign({order:'fzfz', ex:true, rate:1}, store.get('fr-read2', {}))};
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const zhClean = s => { const t = (s||'').replace(/[（(][^）)]*[A-Za-z][^）)]*[）)]/g,'').replace(/\[[^\]]*\]/g,'').replace(/[「」]/g,'').replace(/[／/]/g,'，').replace(/…/g,'').replace(/\s+/g,' ').trim(); return /[\u4e00-\u9fff]/.test(t) ? t : ''; };
+function speakAwait(text, lang, rate){
+  return new Promise(resolve => {
+    let done = false, tm;
+    const fin = () => { if(done) return; done = true; clearTimeout(tm); resolve(); };
+    tm = setTimeout(fin, 5000 + text.length * 450);
+    const zh = lang === 'zh';
+    let use;
+    if (zh) use = (engine==='claude' && claudeTTS) ? 'claude' : voiceZH ? 'browser' : claudeTTS ? 'claude' : 'none';
+    else {
+      use = engine; if (use==='auto') use = voiceFR ? 'browser' : (claudeTTS ? 'claude' : 'none');
+      if (use==='browser' && !voiceFR) use = claudeTTS ? 'claude' : 'none';
+      if (use==='claude' && !claudeTTS) use = voiceFR ? 'browser' : 'none';
+    }
+    if (use === 'none') return fin();
+    if (use === 'claude') {
+      const go = retry => claudeTTS.speak(text, {voice:'buttery', language: zh ? 'zh-TW' : 'fr-FR', rate: Math.min(1.5, Math.max(0.7, rate))})
+        .then(fin, err => { if (err && err.code === 'rate_limited' && retry) setTimeout(() => go(false), 1500); else fin(); });
+      go(true);
+    } else {
+      try {
+        const u = new SpeechSynthesisUtterance(text), v = zh ? voiceZH : voiceFR;
+        u.voice = v; u.lang = v.lang; u.rate = rate; u.onend = fin; u.onerror = fin;
+        speechSynthesis.speak(u);
+      } catch(e){ fin(); }
+    }
+  });
+}
+function readSeq(el){
+  const fr = el.dataset.pf ? cleanText(el.dataset.pf) : '', zh = zhClean(el.dataset.pz);
+  const f = fr ? [[fr,'fr']] : [], z = zh ? [[zh,'zh']] : [];
+  return RD.opt.order === 'fzfz' ? [...f, ...z, ...f, ...z] : [...f, ...f, ...z, ...z];
+}
+const readBuild = () => [...$('#view').querySelectorAll('[data-pf],[data-pz]')].filter(el => RD.opt.ex || !el.hasAttribute('data-ex'));
+function readMark(el){
+  document.querySelectorAll('.reading').forEach(x => x.classList.remove('reading'));
+  if (!el) return;
+  const d = el.closest('details'); if (d && !d.open) d.open = true;
+  el.classList.add('reading');
+  try { el.scrollIntoView({block:'center', behavior:'smooth'}); } catch(e){}
+}
+function readUI(fin){
+  const rb = $('#readbar'); if(!rb) return;
+  const n = RD.q.length, mid = RD.i > 0 && RD.i < n;
+  $('#rdPlay').textContent = RD.on ? '⏸ 暫停' : mid ? '▶ 繼續' : '▶ 朗讀整頁';
+  $('#rdStop').hidden = !(RD.on || mid);
+  const noZh = !voiceZH && !claudeTTS;
+  $('#rdInfo').textContent = (RD.on || mid) ? `${Math.min(RD.i+1,n)} / ${n}` : fin ? '讀完了' : '每個詞唸兩輪：法文→中文→法文→中文';
+  if (noZh && !(RD.on || mid)) $('#rdInfo').textContent += '（找不到中文語音，只念法文）';
+  $('#rdExL').hidden = S.tab !== 'vocab';
+  $('#rdOrder').value = RD.opt.order; $('#rdRate').value = String(RD.opt.rate); $('#rdEx').checked = RD.opt.ex;
+}
+function readStopAudio(){ try{ speechSynthesis.cancel(); }catch(e){} try{ claudeTTS && claudeTTS.stop(); }catch(e){} }
+function readPause(){ RD.tok++; RD.on = false; readStopAudio(); readUI(); }
+function readReset(){ RD.tok++; RD.on = false; RD.i = 0; RD.q = []; readStopAudio(); readMark(null); readUI(); }
+async function readRun(){
+  const tok = ++RD.tok; RD.on = true; readUI();
+  while (tok === RD.tok && RD.i < RD.q.length) {
+    const el = RD.q[RD.i];
+    if (!el.isConnected) { RD.i++; continue; }
+    readMark(el); readUI();
+    for (const [t, l] of readSeq(el)) {
+      if (tok !== RD.tok) return;
+      await speakAwait(t, l, RD.opt.rate);
+      if (tok !== RD.tok) return;
+      await sleep(l === 'fr' ? 350 : 300);
+    }
+    if (tok !== RD.tok) return;
+    RD.i++; await sleep(550);
+  }
+  if (tok === RD.tok) { RD.on = false; RD.i = 0; RD.q = []; readMark(null); readUI(true); }
+}
+function readToggle(){
+  if (RD.on) { readPause(); return; }
+  if (!RD.q.length || RD.i >= RD.q.length || !RD.q[0].isConnected) { RD.q = readBuild(); RD.i = 0; }
+  if (!RD.q.length) { $('#rdInfo').textContent = '這一頁沒有可朗讀的內容'; return; }
+  readRun();
+}
+$('#rdPlay').addEventListener('click', readToggle);
+$('#rdStop').addEventListener('click', readReset);
+$('#rdOrder').addEventListener('change', e => { RD.opt.order = e.target.value; store.set('fr-read2', RD.opt); });
+$('#rdRate').addEventListener('change', e => { RD.opt.rate = +e.target.value; store.set('fr-read2', RD.opt); });
+$('#rdEx').addEventListener('change', e => { RD.opt.ex = e.target.checked; store.set('fr-read2', RD.opt); readReset(); });
 
 /* ============================ 狀態 ============================ */
 const S = {
@@ -756,23 +1006,29 @@ function renderTabs(){
   $('#tabs').innerHTML = T.map(([k,n]) => `<button role="tab" data-tab="${k}" aria-selected="${S.tab===k}">${n}${k==='wrong'&&nWrong?`<span class="n">${nWrong}</span>`:''}${k==='hw'&&hwPending()?`<span class="n hw">${hwPending()}</span>`:''}</button>`).join('');
 }
 function render(){
+  readReset();
   renderTabs();
   const v = $('#view');
   v.classList.toggle('newlesson', ['vocab','grammar','sent'].includes(S.tab) && lesson().id===newestL());
   ({vocab:vocabView, grammar:grammarView, sent:sentView, hw:hwView, practice:practiceView, wrong:wrongView})[S.tab](v);
+  $('#readbar').hidden = S.tab === 'practice' || !readBuild().length;
+  readUI();
 }
+const IMG = {"Ça va ?": "🙂", "Ça va bien": "👍", "Et toi ?": "👉", "toi": "👉", "ça": "👇", "AFP": "📰", "CGT": "✊", "JO": "🏅", "OMC": "🌐", "ONG": "🤝", "TVA": "🧾", "RER": "🚆", "TGV": "🚄", "SNCF": "🚉", "Bonjour": "☀️", "Salut": "🤙", "Au revoir": "👋", "À bientôt": "⏰", "Merci": "🙏", "Pas mal": "👌", "Très bien": "🌟", "Comme ci comme ça": "🤷", "Comment allez-vous ?": "🤝", "Ciao": "✌️", "Je vais bien": "😊", "Et vous ?": "👥", "S'il vous plaît": "🙇", "madame": "👩", "monsieur": "👨", "mademoiselle": "👧", "papa": "👨‍👦", "mamie": "👵", "tata": "👩‍🦰", "femme": "🚺", "table": "svg:table", "tasse": "☕", "thé": "🍵", "lit": "🛏️", "pile": "🔋", "pipe": "svg:pipe", "nappe": "svg:nappe", "site": "💻", "lycée": "🏫", "pyramide": "svg:pyramid", "style": "🎨", "âne": "🐴", "animal": "🐾", "mythe": "🐉", "lilas": "💐", "appel": "📞", "attaque": "⚔️", "type": "🧍", "mal": "🤕", "île": "🏝️", "maïs": "🌽", "lyre": "🎼", "tête": "👤", "lis": "🌷", "et": "➕", "mais": "🔀", "aussi": "✅", "moi": "🙋", "vous": "👥", "bien": "👍", "pas": "🚫", "un": "1️⃣", "une": "1️⃣", "le": "🔹", "la": "🔸", "là": "📍", "il": "👨", "je": "🙋", "vais": "🚶", "c'est": "👉", "pâle": "🤍", "nette": "✨", "solennel": "🎩", "mon": "🙋‍♂️", "ma": "🙋‍♀️", "ton": "👈", "ta": "👈", "son": "👤", "sa": "👤", "tu": "👉", "elle": "👩", "on": "👥", "nous": "👨‍👩‍👧", "ils": "👬", "elles": "👭", "être": "🧍", "suis": "🙋", "es": "👉", "est": "👤", "sommes": "👨‍👩‍👧", "êtes": "🧑‍🤝‍🧑", "sont": "👬", "ne": "🚫", "oui": "✅", "non": "❌", "Est-ce que": "❓", "Je suis": "🙋", "Je ne suis pas": "🙋❌", "Suis-je ?": "🙋❓", "Ne suis-je pas ?": "🙋❓", "Tu es": "👉", "Tu n'es pas": "👉❌", "Es-tu ?": "👉❓", "N'es-tu pas ?": "👉❓", "Il est": "👨", "Il n'est pas": "👨❌", "Est-il ?": "👨❓", "N'est-il pas ?": "👨❓", "Elle est": "👩", "Elle n'est pas": "👩❌", "Est-elle ?": "👩❓", "N'est-elle pas ?": "👩❓", "On est": "👥", "On n'est pas": "👥❌", "Nous sommes": "👨‍👩‍👧", "Nous ne sommes pas": "👨‍👩‍👧❌", "Sommes-nous ?": "👨‍👩‍👧❓", "Ne sommes-nous pas ?": "👨‍👩‍👧❓", "Vous êtes": "🧑‍🤝‍🧑", "Vous n'êtes pas": "🧑‍🤝‍🧑❌", "Êtes-vous ?": "🧑‍🤝‍🧑❓", "N'êtes-vous pas ?": "🧑‍🤝‍🧑❓", "Ils sont": "👬", "Ils ne sont pas": "👬❌", "Sont-ils ?": "👬❓", "Ne sont-ils pas ?": "👬❓", "Elles sont": "👭", "Elles ne sont pas": "👭❌", "Sont-elles ?": "👭❓", "Ne sont-elles pas ?": "👭❓", "Ce sont": "👉👉", "Ce n'est pas": "👉❌", "Ce ne sont pas": "👉👉❌", "Est-ce ?": "👉❓", "N'est-ce pas ?": "🤔"};
+const ICONS = {"table": "<svg viewBox=\"0 0 48 48\" width=\"34\" height=\"34\" aria-hidden=\"true\"><rect x=\"5\" y=\"14\" width=\"38\" height=\"6\" rx=\"2\" fill=\"var(--brand)\"/><rect x=\"9\" y=\"20\" width=\"4\" height=\"19\" fill=\"var(--brand)\"/><rect x=\"35\" y=\"20\" width=\"4\" height=\"19\" fill=\"var(--brand)\"/></svg>", "nappe": "<svg viewBox=\"0 0 48 48\" width=\"34\" height=\"34\" aria-hidden=\"true\"><rect x=\"5\" y=\"12\" width=\"38\" height=\"5\" rx=\"2\" fill=\"var(--brand)\"/><path d=\"M7 17h34v10l-4 5-5-5-4 5-4-5-4 5-4-5-5 5-4-5z\" fill=\"var(--f)\" opacity=\".75\"/><rect x=\"9\" y=\"30\" width=\"4\" height=\"10\" fill=\"var(--brand)\"/><rect x=\"35\" y=\"30\" width=\"4\" height=\"10\" fill=\"var(--brand)\"/></svg>", "pipe": "<svg viewBox=\"0 0 48 48\" width=\"34\" height=\"34\" aria-hidden=\"true\"><path d=\"M28 8h12v16a6 6 0 0 1-12 0z\" fill=\"var(--brand)\"/><path d=\"M28 27c-7 9-15 9-21 4\" fill=\"none\" stroke=\"var(--brand)\" stroke-width=\"4\" stroke-linecap=\"round\"/></svg>", "pyramid": "<svg viewBox=\"0 0 48 48\" width=\"34\" height=\"34\" aria-hidden=\"true\"><path d=\"M24 7 L43 39 H5 Z\" fill=\"var(--new-edge)\"/><path d=\"M24 7 L24 39 L43 39 Z\" fill=\"var(--new-ink)\" opacity=\".45\"/></svg>"};
+const picOf = w => { const v = IMG[w.fr]; if(!v) return `<span class="pl">${esc(w.fr.charAt(0).toUpperCase())}</span>`; return v.startsWith('svg:') ? ICONS[v.slice(4)] : `<span class="em">${v}</span>`; };
 let VSET = new Set();
 function wcard(w, showEx=true){
   const g = w.g ? `<span class="b ${w.g}">${w.g==='m'?'♂ 陽性 m.':'♀ 陰性 f.'}</span>` : '';
   const art = w.g ? (w.g==='m' ? (/^[aeiouyhâéèêîôû]/i.test(w.fr)?'':'') : '') : '';
-  return `<article class="card wcard">
-    <div class="wtop"><button class="say" data-say="${esc(w.fr)}" aria-label="播放 ${esc(w.fr)}">${spk()}</button>
+  return `<article class="card wcard" data-pf="${esc(w.fr)}" data-pz="${esc(w.zh)}">
+    <div class="wtop"><div class="pic" role="img" aria-label="示意圖：${esc(w.zh)}">${picOf(w)}</div><button class="say" data-say="${esc(w.fr)}" aria-label="播放 ${esc(w.fr)}">${spk()}</button>
       <div><div class="fr">${esc(w.fr)}</div><div class="ipa">[${esc(w.ipa)}]</div></div></div>
     <div class="badges"><span class="b">${POS[w.pos]}</span>${g}${w.lesson===newestL()?'<span class="newtag">新</span>':''}</div>
     <div class="zh ${S.hide?'hide':''}" ${S.hide?'data-reveal tabindex="0" role="button" aria-label="點一下顯示中文"':''}>${esc(w.zh)}</div>
     ${w.note?`<div class="note">${esc(w.note)}</div>`:''}
     ${w.sim?`<div class="sims"><span class="simlabel">相似詞</span>${w.sim.map(x=>`<button class="sim ${VSET.has(x[0].toLowerCase())?'':'ext'}" data-say="${esc(x[0])}" title="${VSET.has(x[0].toLowerCase())?'單字頁已收錄':'補充單字（尚未收錄）'}"><b>${esc(x[0])}</b><span>${esc(x[1])}</span><i>${esc(x[2])}</i></button>`).join('')}</div>`:''}
-    ${showEx&&w.ex?`<div class="ex"><button class="say" data-say="${esc(w.ex[0])}" aria-label="播放例句">${spk()}</button><div><b>${esc(w.ex[0])}</b><br>${esc(w.ex[1])}</div></div>`:''}
+    ${showEx&&w.ex?`<div class="ex" data-ex data-pf="${esc(w.ex[0])}" data-pz="${esc(w.ex[1])}"><button class="say" data-say="${esc(w.ex[0])}" aria-label="播放例句">${spk()}</button><div><b>${esc(w.ex[0])}</b><br>${esc(w.ex[1])}</div></div>`:''}
   </article>`;
 }
 function vocabView(v){
@@ -794,22 +1050,27 @@ function vocabView(v){
   });
   if(!list.length) html += `<p class="note">沒有符合的單字。</p>`;
   v.innerHTML = html;
-  const inp = $('#q'); inp.addEventListener('input', e => { S.search = e.target.value; const pos = e.target.selectionStart; vocabView(v); const n=$('#q'); n.focus(); n.setSelectionRange(pos,pos); });
+  const inp = $('#q'); inp.addEventListener('input', e => { readReset(); S.search = e.target.value; const pos = e.target.selectionStart; vocabView(v); const n=$('#q'); n.focus(); n.setSelectionRange(pos,pos); });
 }
 function grammarView(v){
   const L = lesson();
   let html = L.grammar.map(g => `<article class="card gcard" style="margin-bottom:12px">
     <h3>${esc(g.h)}<span class="tag ${g.ext?'ext':''}">${esc(g.tag)}</span>${L.id===newestL()?'<span class="newtag">新</span>':''}</h3>
     ${g.p.map(t=>`<p>${esc(t)}</p>`).join('')}
-    <div class="exrows">${g.ex.map(e=>`<div class="exrow"><button class="say" data-say="${esc(e[0])}" aria-label="播放 ${esc(e[0])}">${spk()}</button><span class="fr">${esc(e[0])}</span><span class="ipa">[${esc(e[1])}]</span><span>${esc(e[2])}</span></div>`).join('')}</div>
+    <div class="exrows">${g.ex.map(e=>`<div class="exrow" data-pf="${esc(e[0])}" data-pz="${esc(e[2])}"><button class="say" data-say="${esc(e[0])}" aria-label="播放 ${esc(e[0])}">${spk()}</button><span class="fr">${esc(e[0])}</span><span class="ipa">[${esc(e[1])}]</span><span>${esc(e[2])}</span></div>`).join('')}</div>
   </article>`).join('');
   html += `<article class="card gcard"><h3>字母表 alphabet<span class="tag">作業 2</span></h3><p class="note">點一下聽字母的法語唸法，括號是音標。</p>
-    <div class="alpha">${L.alphabet.map(a=>`<button data-say="${esc(a[2])}" aria-label="字母 ${a[0]}"><b>${a[0]}</b><span>[${esc(a[1])}]</span></button>`).join('')}</div></article>`;
+    <div class="alpha">${L.alphabet.map(a=>`<button data-say="${esc(a[2])}" data-pf="${esc(a[2])}" aria-label="字母 ${a[0]}"><b>${a[0]}</b><span>[${esc(a[1])}]</span></button>`).join('')}</div></article>`;
   v.innerHTML = html;
 }
 function article(w){ // returns {indef, def}
   const vowel = /^[aeiouyhâéèêîôû]/i.test(w.fr);
   return {indef: w.g==='f'?'une':'un', def: vowel?"l'":(w.g==='f'?'la ':'le ')};
+}
+function sentGroups(L){   // 句子依 grp 分組，沒有分組的歸在「用今天單字組成的句子」
+  const order = [], map = {};
+  L.sents.forEach(x => { const k = x.grp || '用今天單字組成的句子'; if(!map[k]){ map[k]=[]; order.push(k); } map[k].push(x); });
+  return order.map(k => ({name:k, items:map[k]}));
 }
 function sentView(v){
   const L = lesson();
@@ -825,9 +1086,9 @@ function sentView(v){
       <button class="say" data-say="${esc(made)}" aria-label="播放造句">${spk()}</button><output>${esc(made)}</output></div>
     <div class="note" style="margin-top:6px">這是${esc(w.zh)}。　定冠詞：${esc(a.def+w.fr)}（${w.g==='m'?'陽性':'陰性'}）</div></div>
   ${(L.dialogues || [{h:'課堂小劇場', lines:L.dialogue}]).map(D=>`<h2>${esc(D.h)}</h2>
-  <div class="card"><div class="dlg">${D.lines.map(d=>`<div class="bub ${d[0]}"><button class="say" data-say="${esc(d[1])}" aria-label="播放">${spk()}</button><div><div class="fr">${esc(d[1])}</div><div class="note">${esc(d[2])}</div></div></div>`).join('')}</div></div>`).join('')}
-  <h2>用今天單字組成的句子<span class="cnt">${L.sents.length}</span></h2>
-  <div class="card">${L.sents.map(s=>`<div class="sent"><button class="say" data-say="${esc(s.fr)}" aria-label="播放">${spk()}</button><div><div class="fr">${esc(s.fr)}</div><div class="zh">${esc(s.zh)}</div><div class="wchips">${s.words.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div></div>`).join('')}</div>`;
+  <div class="card"><div class="dlg">${D.lines.map(d=>`<div class="bub ${d[0]}" data-pf="${esc(d[1])}" data-pz="${esc(d[2])}"><button class="say" data-say="${esc(d[1])}" aria-label="播放">${spk()}</button><div><div class="fr">${esc(d[1])}</div><div class="note">${esc(d[2])}</div></div></div>`).join('')}</div></div>`).join('')}
+  ${sentGroups(L).map(G=>`<h2>${esc(G.name)}<span class="cnt">${G.items.length}</span></h2>
+  <div class="card">${G.items.map(s=>`<div class="sent" data-pf="${esc(s.fr)}" data-pz="${esc(s.zh)}"><button class="say" data-say="${esc(s.fr)}" aria-label="播放">${spk()}</button><div><div class="fr">${esc(s.fr)}</div><div class="zh">${esc(s.zh)}</div><div class="wchips">${s.words.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div></div>`).join('')}</div>`).join('')}`;
   $('#mk').addEventListener('change', e => { S.maker = e.target.value; sentView(v); });
 }
 
@@ -852,12 +1113,12 @@ function wrongView(v){
   const b = bank(), keys = Object.keys(b);
   if(!keys.length){ v.innerHTML = `<div class="card"><b>錯題本是空的</b><p class="note">練習時答錯的單字、句子和改錯題會自動收進來，之後可以單獨複習。</p></div>`; return; }
   const items = keys.map(k => {
-    if(k.startsWith('w:')){ const w = wordByKey(k.slice(2)); return w && {k, kind:'單字', main:w.fr, sub:`[${w.ipa}] ${w.zh}`}; }
-    if(k.startsWith('s:')){ const s = findSent(k.slice(2)); return s && {k, kind:'句子', main:s.fr, sub:s.zh}; }
-    const f = findFix(k.slice(2)); return f && {k, kind:'改錯', main:f.pre+f.err+f.post, sub:`正確：${f.pre+f.ans+f.post}`};
+    if(k.startsWith('w:')){ const w = wordByKey(k.slice(2)); return w && {k, kind:'單字', main:w.fr, sub:`[${w.ipa}] ${w.zh}`, pf:w.fr, pz:w.zh}; }
+    if(k.startsWith('s:')){ const s = findSent(k.slice(2)); return s && {k, kind:'句子', main:s.fr, sub:s.zh, pf:s.fr, pz:s.zh}; }
+    const f = findFix(k.slice(2)); return f && {k, kind:'改錯', main:f.pre+f.err+f.post, sub:`正確：${f.pre+f.ans+f.post}`, pf:f.pre+f.ans+f.post, pz:''};
   }).filter(Boolean);
   v.innerHTML = `<div class="row" style="margin:0 0 12px"><button class="btn primary" id="reviewAll">練習這 ${items.length} 題</button><button class="btn ghost small" id="clearBank">清空錯題本</button></div>
-  <div class="rlist">${items.map(i=>`<div class="ritem bad"><div class="k">${i.kind} ・ 答錯 ${b[i.k]} 次</div><div class="q">${esc(i.main)}</div><div class="e">${esc(i.sub)}</div><div class="row" style="margin-top:6px"><button class="btn ghost small" data-rm="${esc(i.k)}">我記住了，移除</button></div></div>`).join('')}</div>`;
+  <div class="rlist">${items.map(i=>`<div class="ritem bad" data-pf="${esc(i.pf)}" data-pz="${esc(i.pz)}"><div class="k">${i.kind} ・ 答錯 ${b[i.k]} 次</div><div class="q">${esc(i.main)}</div><div class="e">${esc(i.sub)}</div><div class="row" style="margin-top:6px"><button class="btn ghost small" data-rm="${esc(i.k)}">我記住了，移除</button></div></div>`).join('')}</div>`;
 }
 
 /* ============================ 作業區畫面 ============================ */
@@ -888,7 +1149,7 @@ function taskBody(t){
   const st = hwSt(t.id);
   if(t.kind==='rules'){
     return `<ul class="rules">${t.rules.map(r=>`<li>${esc(r)}</li>`).join('')}</ul>
-      ${t.ex?`<div class="exrows">${t.ex.map(e=>`<div class="exrow"><button class="say" data-say="${esc(e[0])}" aria-label="播放 ${esc(e[0])}">${spk()}</button><span class="fr">${esc(e[0])}</span><span class="ipa">[${esc(e[1])}]</span></div>`).join('')}</div>`:''}
+      ${t.ex?`<div class="exrows">${t.ex.map(e=>`<div class="exrow" data-pf="${esc(e[0])}"><button class="say" data-say="${esc(e[0])}" aria-label="播放 ${esc(e[0])}">${spk()}</button><span class="fr">${esc(e[0])}</span><span class="ipa">[${esc(e[1])}]</span></div>`).join('')}</div>`:''}
       ${attachBox(t)}
       <label class="done"><input type="checkbox" data-hwdone="${t.id}" ${st.done?'checked':''}> 我已背熟${t.attach?'並錄音':''}</label>`;
   }
@@ -906,7 +1167,7 @@ function taskBody(t){
   const cls = t.big_ ? '' : t.items[0].big ? 'hwgrid big' : t.lines ? 'hwlines' : 'hwgrid';
   return `${t.blank?`<div class="row" style="margin:0 0 10px"><button class="chip" data-hwshow="${t.id}" aria-pressed="${!!S.hwShow[t.id]}">${show?'遮住音標':'顯示音標核對'}</button></div>`:''}
     <div class="${cls}">${t.items.map((it,i)=>{ const n = st.items[i]||0; const rep = t.rep||1;
-      return `<div class="hwitem ${n>=rep?'got':''}"><button class="say" data-say="${esc(it.say||it.fr)}" aria-label="播放 ${esc(it.fr)}">${spk()}</button>
+      return `<div class="hwitem ${n>=rep?'got':''}" data-pf="${esc(it.say||it.fr)}" data-pz="${esc(it.zh||'')}"><button class="say" data-say="${esc(it.say||it.fr)}" aria-label="播放 ${esc(it.fr)}">${spk()}</button>
         <div class="hwtxt"><b class="${it.big?'bigl':''}">${esc(it.fr)}</b>${it.ipa?`<span class="ipa ${show?'':'cover'}">[${esc(it.ipa)}]</span>`:''}${it.zh?`<small>${esc(it.zh)}</small>`:''}${it.note?`<small class="nt">${esc(it.note)}</small>`:''}</div>
         <button class="tick" data-tick="${t.id}|${i}" aria-label="第 ${i+1} 項，已唸 ${n} 遍，共需 ${rep} 遍">${rep>1?`${n}/${rep}`:TICK[n]}</button></div>`; }).join('')}</div>
     ${attachBox(t)}`;
@@ -943,24 +1204,36 @@ function pickDistract(w, words, n, byShape){
   else { const same = c.filter(x=>x.cat===w.cat); c = shuffle(same).concat(shuffle(c.filter(x=>x.cat!==w.cat))).slice(0,n+3); }
   return shuffle(c).slice(0,n);
 }
+
+/* 解析裡的陰陽性提示：名詞才標，連冠詞一起記 */
+const GN = g => g==='m' ? '陽性 (m.)' : '陰性 (f.)';
+const isNoun = w => w && w.pos==='n' && w.g;
+const gnWord = w => isNoun(w) ? `${GN(w.g)}，${article(w).indef} ${w.fr}` : '';
+const gnShort = w => isNoun(w) ? `（${w.g==='m'?'陽':'陰'}性 ${w.g}.）` : '';
+function gnText(text){   // 從句子裡找出已收錄的名詞，列出陰陽性
+  const toks = text.toLowerCase().replace(/[,.!?]/g,' ').split(/\s+/).map(t => t.replace(/^(c'est|l'|d')/,'')).filter(Boolean);
+  const seen = new Set(), out = [];
+  allVocab().forEach(w => { if(!isNoun(w)) return; const k = w.fr.toLowerCase(); if(toks.includes(k) && !seen.has(k)){ seen.add(k); out.push(`${w.fr} ${GN(w.g)}`); } });
+  return out.length ? `　名詞陰陽性：${out.join('、')}` : '';
+}
 const MAKE = {
   listenFR(w, P){ const o = shuffle([w, ...pickDistract(w,P.words,3,true)]); return {type:'listenFR', key:'w:'+w.key, w, opts:o.map(x=>x.fr), ans:w.fr, say:w.fr,
-    expl:`${w.fr} [${w.ipa}] ＝ ${w.zh}`}; },
+    expl:`${w.fr} [${w.ipa}] ＝ ${w.zh}` + (isNoun(w) ? `　${gnWord(w)}` : '')}; },
   listenZH(w, P){ const o = shuffle([w, ...pickDistract(w,P.words,3,false)]); return {type:'listenZH', key:'w:'+w.key, w, opts:o.map(x=>x.zh), ans:w.zh, say:w.fr,
-    expl:`${w.fr} [${w.ipa}] ＝ ${w.zh}`}; },
+    expl:`${w.fr} [${w.ipa}] ＝ ${w.zh}` + (isNoun(w) ? `　${gnWord(w)}` : '')}; },
   zh2fr(w, P){ const o = shuffle([w, ...pickDistract(w,P.words,3,false)]); return {type:'zh2fr', key:'w:'+w.key, w, opts:o.map(x=>x.fr), ans:w.fr,
-    expl:`${w.zh} 的法文是 ${w.fr} [${w.ipa}]` + (w.g?`（${w.g==='m'?'陽':'陰'}性）`:'')}; },
+    expl:`${w.zh} 的法文是 ${w.fr} [${w.ipa}]` + (isNoun(w) ? `　${gnWord(w)}` : '')}; },
   gender(w){ const a = w.g==='f'?'une':'un'; return {type:'gender', key:'w:'+w.key, w, ans:a, opts:['un','une'],
     expl:`${w.fr} 是${w.g==='f'?'陰':'陽'}性名詞 (${w.g}.)，所以用 ${a} ${w.fr}。${w.zh}`}; },
-  speak(w){ return {type:'speak', key:'w:'+w.key, w, expl:`標準唸法：${w.fr} [${w.ipa}]`}; },
+  speak(w){ return {type:'speak', key:'w:'+w.key, w, expl:`標準唸法：${w.fr} [${w.ipa}] ＝ ${w.zh}` + (isNoun(w) ? `　${gnWord(w)}` : '')}; },
   match(w, P, set){ const ws = [w, ...pickDistract(w,P.words,4,false)].filter((x,i,a)=>a.findIndex(y=>y.zh===x.zh)===i).slice(0,5);
-    return {type:'match', key:'w:'+w.key, words:ws, expl:ws.map(x=>`${x.fr}＝${x.zh}`).join('；')}; },
+    return {type:'match', key:'w:'+w.key, words:ws, expl:ws.map(x=>`${x.fr}＝${x.zh}${gnShort(x)}`).join('；')}; },
   build(s, P){
     const tokens = s.fr.split(' '); const lowers = tokens.map(t=>t.toLowerCase().replace(/[,.!?]/g,''));
     const decoys = shuffle(P.sents.filter(x=>x.id!==s.id).flatMap(x=>x.fr.split(' ')).filter(t=>/[a-zàâçéèêîôû]/i.test(t) && !lowers.includes(t.toLowerCase().replace(/[,.!?]/g,'')))).slice(0,1);
-    return {type:'build', key:'s:'+s.id, s, tokens, pool:shuffle([...tokens,...decoys]), expl:`${s.fr}　${s.zh}`};
+    return {type:'build', key:'s:'+s.id, s, tokens, pool:shuffle([...tokens,...decoys]), expl:`${s.fr}　${s.zh}` + gnText(s.fr)};
   },
-  fix(f){ return {type:'fix', key:'f:'+f.id, f, opts:shuffle(f.opts), ans:f.ans, expl:`${f.pre}${f.ans}${f.post}　${f.why}`}; }
+  fix(f){ return {type:'fix', key:'f:'+f.id, f, opts:shuffle(f.opts), ans:f.ans, expl:`${f.pre}${f.ans}${f.post}　${f.why}` + gnText(f.pre+f.ans+f.post)}; }
 };
 function buildQuiz(){
   const st = S.setup; let qs = [];
@@ -1240,6 +1513,7 @@ document.addEventListener('keydown', e => {
   else if(/^[1-4]$/.test(e.key) && curCtl.pick && !curCtl.done){ const i=+e.key-1; const q=Q.qs[Q.i]; if(q.opts && i<q.opts.length) curCtl.pick(i); }
 });
 $('#daySel').innerHTML = LESSONS.map(l=>`<option value="${l.id}">${esc(l.day)} ・ ${esc(l.title)}${l.id===newestL()?'（新）':''}</option>`).join('');
+$('#daySel').value = S.lesson;
 $('#daySel').addEventListener('change', e => { S.lesson = e.target.value; S.maker=null; render(); });
 function applyTheme(t){ const r = document.documentElement; if(t==='auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', t); }
 let themePref = store.get('fr-theme', 'light'); applyTheme(themePref);
