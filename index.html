@@ -1145,6 +1145,19 @@ function attachBox(t){
     <span class="note">只在這個頁面暫存給你自己對照，不會上傳，離開頁面就消失。作業仍要交給老師。</span>
     ${list.map(a=>a.type.startsWith('image')?`<img src="${a.url}" alt="${esc(a.name)}" class="attimg">`:`<div><span class="note">${esc(a.name)}</span><audio controls src="${a.url}"></audio></div>`).join('')}</div>`;
 }
+/* 作業項目的中文與陰陽性：優先用作業自己的資料，其次查單字表，再用下面的補充表（單字表沒收的練習用字） */
+const HWX = {titi:{zh:'巴黎小孩／小頑童（俚語）', g:'m'}, typique:{zh:'典型的'}, tas:{zh:'一堆', g:'m'}, fil:{zh:'線', g:'m'}, paris:{zh:'巴黎'}, si:{zh:'如果／是的（反駁時）'},
+  sal:{zh:'（發音練習用，不是常用單字）'}, natal:{zh:'出生的'}, mis:{zh:'放（mettre 的過去分詞）'}, passe:{zh:'傳球／通行證；也是 passer 的變位', g:'f'}, las:{zh:'疲倦的'}, pitte:{zh:'（發音練習用，不是單字）'}};
+const HWNAME = {'l1-d':'f', 'l1-e':'m'};
+let HWV = null;
+function hwInfo(t, it){
+  if(!HWV){ HWV = {}; allVocab().forEach(v => { const k = v.fr.toLowerCase().replace(/[\s?.]+$/,''); if(!HWV[k]) HWV[k] = v; }); }
+  const k = (it.fr||'').toLowerCase().replace(/[\s?.]+$/,''), v = HWV[k], x = HWX[k] || {};
+  const name = HWNAME[t.id];
+  const g = name || it.g || (v ? (v.pos==='n' ? v.g : '') : (x.g||''));
+  const badge = g ? `<span class="b ${g}">${name ? (g==='f'?'♀ 女名':'♂ 男名') : (g==='m'?'♂ 陽性':'♀ 陰性')}</span>` : '';
+  return {zh: it.zh || (v && v.zh) || x.zh || '', badge};
+}
 function taskBody(t){
   const st = hwSt(t.id);
   if(t.kind==='rules'){
@@ -1167,8 +1180,9 @@ function taskBody(t){
   const cls = t.big_ ? '' : t.items[0].big ? 'hwgrid big' : t.lines ? 'hwlines' : 'hwgrid';
   return `${t.blank?`<div class="row" style="margin:0 0 10px"><button class="chip" data-hwshow="${t.id}" aria-pressed="${!!S.hwShow[t.id]}">${show?'遮住音標':'顯示音標核對'}</button></div>`:''}
     <div class="${cls}">${t.items.map((it,i)=>{ const n = st.items[i]||0; const rep = t.rep||1;
-      return `<div class="hwitem ${n>=rep?'got':''}" data-pf="${esc(it.say||it.fr)}" data-pz="${esc(it.zh||'')}"><button class="say" data-say="${esc(it.say||it.fr)}" aria-label="播放 ${esc(it.fr)}">${spk()}</button>
-        <div class="hwtxt"><b class="${it.big?'bigl':''}">${esc(it.fr)}</b>${it.ipa?`<span class="ipa ${show?'':'cover'}">[${esc(it.ipa)}]</span>`:''}${it.zh?`<small>${esc(it.zh)}</small>`:''}${it.note?`<small class="nt">${esc(it.note)}</small>`:''}</div>
+      const hi = hwInfo(t, it);
+      return `<div class="hwitem ${n>=rep?'got':''}" data-pf="${esc(it.say||it.fr)}" data-pz="${esc(hi.zh)}"><button class="say" data-say="${esc(it.say||it.fr)}" aria-label="播放 ${esc(it.fr)}">${spk()}</button>
+        <div class="hwtxt"><b class="${it.big?'bigl':''}">${esc(it.fr)}</b>${it.ipa?`<span class="ipa ${show?'':'cover'}">[${esc(it.ipa)}]</span>`:''}${hi.zh||hi.badge?`<small>${esc(hi.zh)}${hi.zh&&hi.badge?' ':''}${hi.badge}</small>`:''}${it.note?`<small class="nt">${esc(it.note)}</small>`:''}</div>
         <button class="tick" data-tick="${t.id}|${i}" aria-label="第 ${i+1} 項，已唸 ${n} 遍，共需 ${rep} 遍">${rep>1?`${n}/${rep}`:TICK[n]}</button></div>`; }).join('')}</div>
     ${attachBox(t)}`;
 }
