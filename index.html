@@ -267,6 +267,8 @@ details.finished .prog{color:var(--ok)}
 #readbar .rdopts{position:absolute;right:0;top:100%;z-index:6;display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:6px;padding:12px 14px;background:var(--surface);border:2px solid var(--line);border-radius:14px;font-size:14px;min-width:230px}
 #readbar .rdnote{font-size:12px;color:var(--muted);font-weight:700}
 #readbar select{font:inherit;font-weight:800;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:3px 6px}
+.totop{position:fixed;right:16px;bottom:18px;z-index:8;width:46px;height:46px;border-radius:50%;border:2px solid var(--line);background:var(--surface);color:var(--brand);font-size:22px;font-weight:900;line-height:1;box-shadow:0 3px 10px rgba(0,0,0,.18);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.totop[hidden]{display:none}
 .reading{outline:3px solid var(--brand);outline-offset:3px;border-radius:14px;background:var(--brand-soft)!important}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -304,6 +306,7 @@ details.finished .prog{color:var(--ok)}
   </div>
   <div class="lgd" id="gleg" aria-label="背景顏色說明" hidden><span class="gm">♂ 陽性：藍色</span><span class="gf">♀ 陰性：紅粉色</span><span class="gn">不分陰陽性：白底</span></div>
   <section class="view" id="view"></section>
+  <button class="totop" id="toTop" aria-label="回到最頂端" hidden>↑</button>
 </div>
 
 <div id="quiz" hidden>
@@ -1013,6 +1016,9 @@ function readMark(el){
   el.classList.add('reading');
   try { el.scrollIntoView({block:'center', behavior:'smooth'}); } catch(e){}
 }
+function syncTop(){ const b=$('#toTop'); if(b) b.hidden = S.tab==='practice' || (window.scrollY||document.documentElement.scrollTop) < 300; }
+window.addEventListener('scroll', syncTop, {passive:true});
+document.addEventListener('click', e => { if(e.target.closest && e.target.closest('#toTop')) window.scrollTo({top:0,behavior:'smooth'}); });
 function readUI(fin){
   const rb = $('#readbar'); if(!rb) return;
   const n = RD.q.length, mid = RD.i > 0 && RD.i < n;
@@ -1081,6 +1087,7 @@ function render(){
   ({vocab:vocabView, grammar:grammarView, sent:sentView, hw:hwView, practice:practiceView, wrong:wrongView})[S.tab](v);
   $('#readbar').hidden = S.tab === 'practice' || !readBuild().length;
   $('#gleg').hidden = true;
+  syncTop();
   { const nv=$('.tabrow'); if(nv) document.documentElement.style.setProperty('--navh', nv.offsetHeight+'px'); }
   readUI();
 }
