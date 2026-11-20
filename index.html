@@ -877,8 +877,13 @@ const wordKeyMap = () => { if(!wordKeyMap.m){ wordKeyMap.m = {}; allVocab().forE
 function cleanText(text){
   let t = text.replace(/[!?]/g,'').replace(/\s+/g,' ').trim();
   const alt = wordKeyMap()[t.toLowerCase()];   // 有指定 say 的單字用指定拼法
-  return alt || t;
+  return pron(alt || t);
 }
+/* 發音修正：語音引擎唸錯的單字，改用拼讀寫法送給引擎（畫面上仍顯示原本拼寫）。
+   maïs 會被唸成 mais（但是）；ï 要分開唸成 ma-is，所以改送 ma-iss。 */
+const PRON = {'maïs':'ma-iss'};
+const PRON_RE = new RegExp('(^|[^\\p{L}])(' + Object.keys(PRON).join('|') + ')(?=$|[^\\p{L}])', 'giu');
+const pron = t => t.replace(PRON_RE, (m, a, w) => a + PRON[w.toLowerCase()]);
 /* 全站只用「同一個引擎、同一個聲音」：
    自動 = 有瀏覽器法語聲音就一律用它（每次都是同一個人、同一種法語）；
    沒有才改用 Claude 語音，並固定聲音與 fr-FR。唸錯時不再偷偷換引擎。 */
