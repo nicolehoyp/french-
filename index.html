@@ -13,7 +13,7 @@
   --brand:#2c5bff; --brand-edge:#1a3fc2; --brand-soft:#e6ecff;
   --ok:#2f9e4f; --ok-soft:#e1f5e7; --ok-edge:#237a3c;
   --bad:#d93a3f; --bad-soft:#fde7e8; --bad-edge:#a82a2e;
-  --m:#2c5bff; --m-soft:#e6ecff; --f:#c2255c; --f-soft:#fde6ef; --gm:#e3e9f6; --gf:#f6e3ea; --gn:var(--surface); --gn-edge:#888989; --gm-edge:#4A70C2; --gf-edge:#BB547C; --gm-ink:#2f4d8c; --gf-ink:#962f57; --gn-ink:#4f5050;
+  --m:#2c5bff; --m-soft:#e6ecff; --f:#c2255c; --f-soft:#fde6ef; --gm:#e3e9f6; --gf:#f6e3ea; --gn:var(--surface); --gn-edge:#888989; --beige:#f6efe0; --beige-edge:#d8c9a4; --gm-edge:#4A70C2; --gf-edge:#BB547C; --gm-ink:#2f4d8c; --gf-ink:#962f57; --gn-ink:#4f5050;
   --flag:#e5484d;
   --new:#fff2c9; --new-edge:#e0a800; --new-ink:#7a5600;
   --font-body:"Nunito","PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
@@ -24,7 +24,7 @@
     --brand:#6f93ff; --brand-edge:#4468e0; --brand-soft:#1f2c58;
     --ok:#4cc272; --ok-soft:#173a26; --ok-edge:#2f9e4f;
     --bad:#ff6a6f; --bad-soft:#442026; --bad-edge:#d93a3f;
-    --m:#7fa0ff; --m-soft:#1f2c58; --f:#ff7fae; --f-soft:#45213a; --gm:#1f293f; --gf:#3a2430; --gn:var(--surface); --gn-edge:#888989; --gm-edge:#4A70C2; --gf-edge:#BB547C; --gm-ink:#b0c4ee; --gf-ink:#eeaec5; --gn-ink:#c4c5c5; color-scheme:dark; --new:#3d3314; --new-edge:#c79a1c; --new-ink:#ffd666;
+    --m:#7fa0ff; --m-soft:#1f2c58; --f:#ff7fae; --f-soft:#45213a; --gm:#1f293f; --gf:#3a2430; --gn:var(--surface); --gn-edge:#888989; --beige:#3a3426; --beige-edge:#6f6247; --gm-edge:#4A70C2; --gf-edge:#BB547C; --gm-ink:#b0c4ee; --gf-ink:#eeaec5; --gn-ink:#c4c5c5; color-scheme:dark; --new:#3d3314; --new-edge:#c79a1c; --new-ink:#ffd666;
   }
 }
 :root[data-theme="dark"]{
@@ -32,7 +32,7 @@
   --brand:#6f93ff; --brand-edge:#4468e0; --brand-soft:#1f2c58;
   --ok:#4cc272; --ok-soft:#173a26; --ok-edge:#2f9e4f;
   --bad:#ff6a6f; --bad-soft:#442026; --bad-edge:#d93a3f;
-  --m:#7fa0ff; --m-soft:#1f2c58; --f:#ff7fae; --f-soft:#45213a; --gm:#1f293f; --gf:#3a2430; --gn:var(--surface); --gn-edge:#888989; --gm-edge:#4A70C2; --gf-edge:#BB547C; --gm-ink:#b0c4ee; --gf-ink:#eeaec5; --gn-ink:#c4c5c5; color-scheme:dark; --new:#3d3314; --new-edge:#c79a1c; --new-ink:#ffd666;
+  --m:#7fa0ff; --m-soft:#1f2c58; --f:#ff7fae; --f-soft:#45213a; --gm:#1f293f; --gf:#3a2430; --gn:var(--surface); --gn-edge:#888989; --beige:#3a3426; --beige-edge:#6f6247; --gm-edge:#4A70C2; --gf-edge:#BB547C; --gm-ink:#b0c4ee; --gf-ink:#eeaec5; --gn-ink:#c4c5c5; color-scheme:dark; --new:#3d3314; --new-edge:#c79a1c; --new-ink:#ffd666;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
@@ -45,7 +45,8 @@ header.top{padding:22px 0 8px;display:flex;flex-wrap:wrap;gap:12px;align-items:f
 h1{margin:0;font-size:26px;font-weight:900;letter-spacing:.2px}
 h1 small{display:block;font-size:13px;font-weight:700;color:var(--muted);letter-spacing:0}
 select{font:inherit;font-weight:800;padding:8px 12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink)}
-nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:6px;padding:10px 0;overflow-x:auto;border-bottom:1px solid var(--line)}
+nav.tabs{flex:1 1 auto;min-width:0;display:flex;gap:6px;padding:10px 0;overflow-x:auto}
+.tabrow{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
 nav.tabs button{flex:0 0 auto;padding:9px 16px;border-radius:999px;border:2px solid transparent;background:transparent;font-weight:800;color:var(--muted)}
 nav.tabs button[aria-selected="true"]{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
 nav.tabs .n{margin-left:6px;background:var(--bad);color:#fff;border-radius:999px;font-size:12px;padding:1px 7px}
@@ -55,6 +56,9 @@ h2 .cnt{font-size:13px;font-weight:800;color:var(--muted);background:var(--surfa
 .card{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px 18px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.vbar{position:sticky;top:var(--navh,58px);z-index:4;background:var(--bg);padding:8px 0;margin:-4px 0 8px;border-bottom:1px solid var(--line)}
+.vbar .chips{flex-wrap:nowrap;overflow-x:auto;margin:0;padding:2px 2px 4px;scrollbar-width:thin}
+.vbar .chip{flex:0 0 auto;white-space:nowrap}
 .chip{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 14px;font-weight:800;font-size:14px;color:var(--muted)}
 .chip[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
 .tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
@@ -98,8 +102,8 @@ input[type=search]{font:inherit;padding:8px 14px;border-radius:12px;border:2px s
 .ex .say{width:28px;height:28px}.ex .say svg{width:15px;height:15px}
 .sims{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:2px}
 .simlabel{font-size:12px;font-weight:900;color:var(--muted)}
-.sim{display:inline-flex;gap:6px;align-items:baseline;border:1.5px solid var(--brand);background:var(--brand-soft);border-radius:10px;padding:2px 8px;font-size:13px;color:var(--ink)}
-.sim.ext{border-style:dashed;background:transparent;border-color:var(--line)}
+.sim{display:inline-flex;gap:6px;align-items:baseline;border:1.5px solid var(--beige-edge);background:var(--beige);border-radius:10px;padding:2px 8px;font-size:13px;color:var(--ink)}
+.sim.ext{border-style:dashed}
 .sim b{font-weight:800}.sim span{color:var(--muted)}
 .sim i{font-style:normal;font-size:11px;font-weight:800;color:var(--f);background:var(--f-soft);border-radius:6px;padding:0 5px}
 /* grammar */
@@ -253,12 +257,15 @@ details.finished .prog{color:var(--ok)}
 .ritem .e{font-size:14px;color:var(--muted);font-weight:700}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 @media (max-width:520px){.two{grid-template-columns:1fr}h1{font-size:22px}.qprompt{font-size:21px}}
-#readbar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:10px 14px;margin:14px 0 0}
+#readbar{display:flex;flex:0 0 auto;gap:6px;align-items:center}
 #readbar[hidden]{display:none}
-#readbar .rdinfo{font-size:13px;font-weight:800;color:var(--muted)}
-#readbar details{font-size:13px;font-weight:800;color:var(--muted)}
-#readbar summary{cursor:pointer;padding:4px 8px;border-radius:10px;border:2px solid var(--line)}
-#readbar .rdopts{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin-top:8px}
+#readbar .rdinfo{font-size:12px;font-weight:800;color:var(--muted)}
+#readbar .rdinfo:empty{display:none}
+#readbar details{font-size:15px;font-weight:800;color:var(--muted)}
+#readbar summary{cursor:pointer;padding:4px 9px;border-radius:10px;border:2px solid var(--line);list-style:none}
+#readbar summary::-webkit-details-marker{display:none}
+#readbar .rdopts{position:absolute;right:0;top:100%;z-index:6;display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-top:6px;padding:12px 14px;background:var(--surface);border:2px solid var(--line);border-radius:14px;font-size:14px;min-width:230px}
+#readbar .rdnote{font-size:12px;color:var(--muted);font-weight:700}
 #readbar select{font:inherit;font-weight:800;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:3px 6px}
 .reading{outline:3px solid var(--brand);outline-offset:3px;border-radius:14px;background:var(--brand-soft)!important}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
@@ -282,16 +289,19 @@ details.finished .prog{color:var(--ok)}
     </div>
     <div class="note" id="voiceInfo" style="flex-basis:100%"></div>
   </header>
+  <div class="tabrow">
   <nav class="tabs" role="tablist" id="tabs"></nav>
-<div id="readbar" role="region" aria-label="整頁連續朗讀" hidden>
-  <button class="btn primary small" id="rdPlay">▶ 朗讀整頁</button>
-  <button class="btn ghost small" id="rdStop" hidden>■ 停止</button>
-  <span class="rdinfo" id="rdInfo" aria-live="polite"></span>
-  <details><summary>設定</summary><div class="rdopts">
-    <label>順序 <select id="rdOrder"><option value="fzfz">法 中 法 中（兩輪）</option><option value="ffzz">法 法 中 中</option></select></label>
-    <label>語速 <select id="rdRate"><option value="0.8">慢</option><option value="1">正常</option></select></label>
-    <label id="rdExL"><input type="checkbox" id="rdEx"> 含例句</label></div></details>
-</div>
+  <div id="readbar" role="region" aria-label="整頁連續朗讀" hidden>
+    <button class="btn primary small" id="rdPlay" aria-label="朗讀整頁">▶ 朗讀</button>
+    <button class="btn ghost small" id="rdStop" aria-label="停止朗讀" hidden>■</button>
+    <span class="rdinfo" id="rdInfo" aria-live="polite"></span>
+    <details class="rdset"><summary aria-label="朗讀設定">⚙</summary><div class="rdopts">
+      <label>順序 <select id="rdOrder"><option value="fzfz">法 中 法 中（兩輪）</option><option value="ffzz">法 法 中 中</option></select></label>
+      <label>語速 <select id="rdRate"><option value="0.8">慢</option><option value="1">正常</option></select></label>
+      <label id="rdExL"><input type="checkbox" id="rdEx"> 含例句</label>
+      <div class="rdnote" id="rdNote" hidden>找不到中文語音，只念法文</div></div></details>
+  </div>
+  </div>
   <div class="lgd" id="gleg" aria-label="背景顏色說明" hidden><span class="gm">♂ 陽性：藍色</span><span class="gf">♀ 陰性：紅粉色</span><span class="gn">不分陰陽性：白底</span></div>
   <section class="view" id="view"></section>
 </div>
@@ -1006,11 +1016,11 @@ function readMark(el){
 function readUI(fin){
   const rb = $('#readbar'); if(!rb) return;
   const n = RD.q.length, mid = RD.i > 0 && RD.i < n;
-  $('#rdPlay').textContent = RD.on ? '⏸ 暫停' : mid ? '▶ 繼續' : '▶ 朗讀整頁';
+  $('#rdPlay').textContent = RD.on ? '⏸ 暫停' : mid ? '▶ 繼續' : '▶ 朗讀';
   $('#rdStop').hidden = !(RD.on || mid);
   const noZh = !voiceZH && !claudeTTS;
-  $('#rdInfo').textContent = (RD.on || mid) ? `${Math.min(RD.i+1,n)} / ${n}` : fin ? '讀完了' : '每個詞唸兩輪：法文→中文→法文→中文';
-  if (noZh && !(RD.on || mid)) $('#rdInfo').textContent += '（找不到中文語音，只念法文）';
+  $('#rdInfo').textContent = (RD.on || mid) ? `${Math.min(RD.i+1,n)}/${n}` : fin ? '讀完了' : '';
+  $('#rdNote').hidden = !noZh;
   $('#rdExL').hidden = S.tab !== 'vocab';
   $('#rdOrder').value = RD.opt.order; $('#rdRate').value = String(RD.opt.rate); $('#rdEx').checked = RD.opt.ex;
 }
@@ -1070,7 +1080,8 @@ function render(){
   const v = $('#view');
   ({vocab:vocabView, grammar:grammarView, sent:sentView, hw:hwView, practice:practiceView, wrong:wrongView})[S.tab](v);
   $('#readbar').hidden = S.tab === 'practice' || !readBuild().length;
-  $('#gleg').hidden = !['vocab','grammar','hw','wrong'].includes(S.tab);
+  $('#gleg').hidden = true;
+  { const nv=$('.tabrow'); if(nv) document.documentElement.style.setProperty('--navh', nv.offsetHeight+'px'); }
   readUI();
 }
 const IMG = {"Ça va ?": "🙂", "Ça va bien": "👍", "Et toi ?": "👉", "toi": "👉", "ça": "👇", "AFP": "📰", "CGT": "✊", "JO": "🏅", "OMC": "🌐", "ONG": "🤝", "TVA": "🧾", "RER": "🚆", "TGV": "🚄", "SNCF": "🚉", "Bonjour": "☀️", "Salut": "🤙", "Au revoir": "👋", "À bientôt": "⏰", "Merci": "🙏", "Pas mal": "👌", "Très bien": "🌟", "Comme ci comme ça": "🤷", "Comment allez-vous ?": "🤝", "Ciao": "✌️", "Je vais bien": "😊", "Et vous ?": "👥", "S'il vous plaît": "🙇", "madame": "👩", "monsieur": "👨", "mademoiselle": "👧", "papa": "👨‍👦", "mamie": "👵", "tata": "👩‍🦰", "femme": "🚺", "table": "svg:table", "tasse": "☕", "thé": "🍵", "lit": "🛏️", "pile": "🔋", "pipe": "svg:pipe", "nappe": "svg:nappe", "site": "💻", "lycée": "🏫", "pyramide": "svg:pyramid", "style": "🎨", "âne": "🐴", "animal": "🐾", "mythe": "🐉", "lilas": "💐", "appel": "📞", "attaque": "⚔️", "type": "🧍", "mal": "🤕", "île": "🏝️", "maïs": "🌽", "lyre": "🎼", "tête": "👤", "lis": "🌷", "et": "➕", "mais": "🔀", "aussi": "✅", "moi": "🙋", "vous": "👥", "bien": "👍", "pas": "🚫", "un": "1️⃣", "une": "1️⃣", "le": "🔹", "la": "🔸", "là": "📍", "il": "👨", "je": "🙋", "vais": "🚶", "c'est": "👉", "pâle": "🤍", "nette": "✨", "solennel": "🎩", "mon": "🙋‍♂️", "ma": "🙋‍♀️", "ton": "👈", "ta": "👈", "son": "👤", "sa": "👤", "tu": "👉", "elle": "👩", "on": "👥", "nous": "👨‍👩‍👧", "ils": "👬", "elles": "👭", "être": "🧍", "suis": "🙋", "es": "👉", "est": "👤", "sommes": "👨‍👩‍👧", "êtes": "🧑‍🤝‍🧑", "sont": "👬", "ne": "🚫", "oui": "✅", "non": "❌", "Est-ce que": "❓", "Je suis": "🙋", "Je ne suis pas": "🙋❌", "Suis-je ?": "🙋❓", "Ne suis-je pas ?": "🙋❓", "Tu es": "👉", "Tu n'es pas": "👉❌", "Es-tu ?": "👉❓", "N'es-tu pas ?": "👉❓", "Il est": "👨", "Il n'est pas": "👨❌", "Est-il ?": "👨❓", "N'est-il pas ?": "👨❓", "Elle est": "👩", "Elle n'est pas": "👩❌", "Est-elle ?": "👩❓", "N'est-elle pas ?": "👩❓", "On est": "👥", "On n'est pas": "👥❌", "Nous sommes": "👨‍👩‍👧", "Nous ne sommes pas": "👨‍👩‍👧❌", "Sommes-nous ?": "👨‍👩‍👧❓", "Ne sommes-nous pas ?": "👨‍👩‍👧❓", "Vous êtes": "🧑‍🤝‍🧑", "Vous n'êtes pas": "🧑‍🤝‍🧑❌", "Êtes-vous ?": "🧑‍🤝‍🧑❓", "N'êtes-vous pas ?": "🧑‍🤝‍🧑❓", "Ils sont": "👬", "Ils ne sont pas": "👬❌", "Sont-ils ?": "👬❓", "Ne sont-ils pas ?": "👬❓", "Elles sont": "👭", "Elles ne sont pas": "👭❌", "Sont-elles ?": "👭❓", "Ne sont-elles pas ?": "👭❓", "Ce sont": "👉👉", "Ce n'est pas": "👉❌", "Ce ne sont pas": "👉👉❌", "Est-ce ?": "👉❓", "N'est-ce pas ?": "🤔"};
@@ -1102,11 +1113,10 @@ function vocabView(v){
   const q = S.search.trim().toLowerCase();
   const list = L.vocab.filter(w => (S.cat==='all'||String(w.cat)===S.cat) && (!q || w.fr.toLowerCase().includes(q) || w.zh.includes(q) || norm(w.fr).includes(norm(q))));
   const nCount = L.vocab.filter(w=>w.pos==='n').length;
-  let html = `<div class="card"><b>${esc(L.day)} · ${esc(L.title)}</b>${L.id===newestL()?' <span class="newtag">最新一課</span>':''}<div class="note">來源：${esc(L.source)} ・ 共 ${L.vocab.length} 個單字／片語，其中 ${nCount} 個名詞已標示陰陽性。♂ 陽性用 un / le，♀ 陰性用 une / la。</div></div>
-  <div class="chips" style="margin-top:14px" role="group" aria-label="分類">
+  let html = `<div class="vbar" id="vbar"><div class="chips" role="group" aria-label="分類">
     <button class="chip" data-cat="all" aria-pressed="${S.cat==='all'}">全部</button>
     ${CATS.map((c,i)=>L.vocab.some(w=>w.cat===i)?`<button class="chip" data-cat="${i}" aria-pressed="${S.cat===String(i)}">${c}</button>`:'').join('')}
-  </div>
+  </div></div>
   <div class="tools"><input type="search" id="q" placeholder="搜尋法文或中文" value="${esc(S.search)}" aria-label="搜尋單字">
     <button class="chip" id="hideZh" aria-pressed="${S.hide}">遮住中文自測</button></div>`;
   CATS.forEach((c,i) => {
