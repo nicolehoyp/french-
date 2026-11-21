@@ -287,6 +287,9 @@ table.gtab .exw{display:block;width:100%;margin:0;padding:6px 8px}
 table.gtab .exw small{display:block;margin-top:1px}
 div.gh{font-weight:800;font-size:13px;color:var(--muted);margin:10px 0 4px}
 div.cgrid .cell{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:6px;border:1px solid var(--line);border-radius:10px;background:var(--surface);min-height:56px}
+div.cgrid .cell{font:inherit;color:inherit;text-align:left;cursor:pointer}
+div.cgrid .cell em{font-style:normal;font-weight:800;font-size:12px;color:var(--accent,#3f60a5);margin-top:auto}
+div.cgrid .cell:active{transform:scale(.97)}
 div.cgrid .cell b{font-size:16px}
 div.cgrid .cell span{font-size:11.5px;color:var(--muted);line-height:1.3}
 div.sip{color:var(--muted);font-weight:700;font-size:13px;margin:1px 0 2px}
@@ -400,10 +403,10 @@ const L0 = {
     {h:'詞末的發音規則', tag:'語音', p:['拼寫一：子音字母在詞末一般不發音，例如 salut 的 t。（salut）','拼寫二：f、l、c、r、q 這五個子音字母在詞末要發音，例如 bonjour 的 r。（bonjour）','拼寫三：母音字母 e 在詞末一般不發音。（table、pile）'],
       ex:[['salut','saly','嗨'],['bonjour','bɔ̃ʒur','你好'],['table','tabl','桌子'],['pile','pil','電池']]},
     {h:'母音讀法小提示', tag:'語音', p:[],
-      cells:[['i','像數字「1」'],['e','像英語字母 A'],['ɛ','像「艾」'],['a','像「啊」'],['u','像「烏」'],['o','像「哦」'],['ɔ','像「噢」'],['ə','像「額」（音最輕）'],['ø','嘔吐音（嘴巴小圓型）'],['œ','嘔吐音（嘴巴大圓型）'],['y','像「魚」'],['ɑ̃','鼻化，像「昂」'],['ɛ̃','鼻化，像「安」'],['œ̃','鼻化，像「安」'],['ɔ̃','鼻化，像拼音 ong']],
+      cells:[['i','像數字「1」','il'],['e','像英語字母 A','thé'],['ɛ','像「艾」','mère'],['a','像「啊」','la'],['u','像「烏」','où'],['o','像「哦」','eau'],['ɔ','像「噢」','pomme'],['ə','像「額」（音最輕）','le'],['ø','嘔吐音（嘴巴小圓型）','deux'],['œ','嘔吐音（嘴巴大圓型）','peur'],['y','像「魚」','tu'],['ɑ̃','鼻化，像「昂」','dans'],['ɛ̃','鼻化，像「安」','vin'],['œ̃','鼻化，像「安」','un'],['ɔ̃','鼻化，像拼音 ong','bon']],
       ex:[['bonjour','bɔ̃ʒur','[ɔ̃] 像 ong'],['bien','bjɛ̃','[ɛ̃] 像「安」'],['salut','saly','[y] 像「魚」']]},
     {h:'子音讀法小提示', tag:'語音', p:[],
-      cells:[['p','破'],['b','波'],['t','特'],['d','得'],['k','克'],['g','哥'],['f','夫'],['v','烏'],['s','絲'],['z','茲'],['ʃ','詩'],['ʒ','日'],['m','摸'],['n','呢'],['ɲ','捏'],['l','勒'],['j','耶'],['w','烏'],['r','喝（法語的 r）'],['ɥ','迂']],
+      cells:[['p','破','papa'],['b','波','bébé'],['t','特','table'],['d','得','dix'],['k','克','café'],['g','哥','gare'],['f','夫','fou'],['v','烏','vous'],['s','絲','sac'],['z','茲','zéro'],['ʃ','詩','chat'],['ʒ','日','je'],['m','摸','maman'],['n','呢','non'],['ɲ','捏','agneau'],['l','勒','lac'],['j','耶','hier'],['w','烏','oui'],['r','喝（法語的 r）','rue'],['ɥ','迂','huit']],
       ex:[['merci','mɛrsi','r 讀 [r] 像「喝」'],['bonjour','bɔ̃ʒur','j 讀 [ʒ] 像「日」']]},
     {h:'音符 accent', tag:'語音', p:['音符是單字的一部分，不可省略，只會出現在母音字母 a e i o u 上（ç 是例外）。','長音符 â ê î ô û；開音符 à è ù；閉音符 é；分音符 ë ï；軟音符（cédille）ç。','拼寫一：é（閉音符）讀 [e]。（thé）','拼寫二：è、ê 讀 [ɛ]。（tête）','拼寫三：à、ù 不改變讀音，用來區分詞義：la（冠詞）與 là（那裡）。（là）','拼寫四：î 不改變讀音。（île）','拼寫五：ï（分音符）表示 i 要單獨發音。（maïs）','拼寫六：ç 讀 [s]。（ça）'],
       ex:[['thé','te','茶（é 讀 [e]）'],['tête','tɛt','頭（ê 讀 [ɛ]）'],['là','la','那裡（和 la 區分）'],['ça','sa','這個（ç 讀 [s]）'],['île','il','島（î）'],['maïs','mais','玉米（ï）']]},
@@ -1232,7 +1235,7 @@ function grpGrid(g){
   return g.grp.map(G => `<div class="gh">${esc(G[0])}</div><div class="exc exgrid">${G[1].map(i => { const e = g.ex[i]; return `<button class="exw" data-say="${esc(e[0])}" data-pf="${esc(e[0])}" data-pz="${esc(e[2])}" aria-label="播放 ${esc(e[0])}"><b>${esc(e[0])}</b> <small>[${esc(e[1])}]</small> <span class="zh">${esc(e[2])}</span></button>`; }).join('')}</div>`).join('');
 }
 function cellGrid(g){
-  return `<div class="cgrid">${g.cells.map(c => `<div class="cell"><b>[${esc(c[0])}]</b><span>${esc(c[1])}</span></div>`).join('')}</div>`;
+  return `<div class="cgrid">${g.cells.map(c => `<button class="cell" data-say="${esc(c[2])}" data-pf="${esc(c[2])}" data-pz="${esc(c[1])}" aria-label="播放 ${esc(c[0])} 例字 ${esc(c[2])}"><b>[${esc(c[0])}]</b><span>${esc(c[1])}</span><em>${esc(c[2])}</em></button>`).join('')}</div>`;
 }
 function tblTable(g){
   return `<div class="spwrap"><table class="spell"><thead><tr><th style="width:4.6em">${esc(/^-/.test(g.tbl[0][0])?"字尾":"類別")}</th><th style="width:5.5em">陰陽性／冠詞</th><th>例詞</th></tr></thead><tbody>${g.tbl.map(r =>
